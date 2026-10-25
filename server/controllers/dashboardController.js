@@ -42,7 +42,7 @@ const getDashboardOverview = async (req, res) => {
       'SELECT monthly_budget, alert_threshold_percent FROM grocery_budgets WHERE user_id = ? AND month_year = ?',
       [userId, currentMonth]
     );
-    const monthlyBudget = budgetRecord ? budgetRecord.monthly_budget : 7500;
+    const monthlyBudget = budgetRecord ? budgetRecord.monthly_budget : 0;
 
     const receiptsThisMonth = await all(
       `SELECT total_amount FROM receipts WHERE user_id = ? AND strftime('%Y-%m', receipt_date) = ?`,
@@ -67,7 +67,7 @@ const getDashboardOverview = async (req, res) => {
       [userId, currentMonth]
     );
     const achievedGoals = goals.filter(g => g.is_achieved || g.current_value >= g.target_value).length;
-    const goalCompletionRate = goals.length > 0 ? Math.round((achievedGoals / goals.length) * 100) : 75;
+    const goalCompletionRate = goals.length > 0 ? Math.round((achievedGoals / goals.length) * 100) : 0;
 
     const rewardRecord = await get(
       'SELECT currency_amount, eligible_grocery_spend, status FROM bite_currency_rewards WHERE user_id = ? AND month_year = ?',
@@ -81,7 +81,17 @@ const getDashboardOverview = async (req, res) => {
       [userId]
     );
 
-    const suggestedMeal = recipeDatabase[0];
+    const pantryInventory = await all('SELECT name FROM pantry_items WHERE user_id = ?', [userId]);
+    const pantryNames = pantryInventory.map(item => item.name.toLowerCase());
+    const suggestedMeal = recipeDatabase
+      .map(recipe => {
+        const matchedIngredients = recipe.requiredIngredients
+          .filter(ingredient => pantryNames.some(name => name.includes(ingredient.name.toLowerCase()) || ingredient.name.toLowerCase().includes(name)))
+          .map(ingredient => ingredient.name);
+        return { ...recipe, matchedIngredients, matchPercentage: Math.round((matchedIngredients.length / recipe.requiredIngredients.length) * 100) };
+      })
+      .filter(recipe => recipe.matchPercentage >= 40)
+      .sort((a, b) => b.matchPercentage - a.matchPercentage)[0] || null;
 
     // 7. Dynamic AI Health & Budget Insights
     const insights = [];
@@ -101,8 +111,15 @@ const getDashboardOverview = async (req, res) => {
       });
     }
 
-    const budgetPercent = Math.round((currentMonthSpent / monthlyBudget) * 100);
-    if (budgetPercent > 70) {
+    const budgetPercent = monthlyBudget > 0 ? Math.round((currentMonthSpent / monthlyBudget) * 100) : 0;
+    if (!monthlyBudget) {
+      insights.push({
+        type: 'budget',
+        tag: 'Budget Setup',
+        title: 'Set a Monthly Grocery Budget',
+        message: 'Add a monthly budget in your profile to track grocery spending against your target.'
+      });
+    } else if (budgetPercent > 70) {
       insights.push({
         type: 'budget',
         tag: 'Smart Spending',
@@ -118,12 +135,19 @@ const getDashboardOverview = async (req, res) => {
       });
     }
 
-    if (expiringPantry.length > 0) {
+    if (expiringPantry.length > 0 && suggestedMeal) {
       insights.push({
         type: 'waste',
         tag: 'Zero Food Waste',
         title: 'Expiring Ingredients Alert',
         message: `Your ${expiringPantry.map(p => p.name).join(', ')} expires in ${expiringPantry[0].days_remaining} day(s). Cook "${suggestedMeal.title}" tonight to minimize waste!`
+      });
+    } else if (expiringPantry.length > 0) {
+      insights.push({
+        type: 'waste',
+        tag: 'Zero Food Waste',
+        title: 'Expiring Ingredients Alert',
+        message: `Your ${expiringPantry.map(p => p.name).join(', ')} expires soon. Add matching ingredients in Pantry-to-Plate to find a recipe.`
       });
     }
 

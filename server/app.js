@@ -42,7 +42,9 @@ const ensureDatabaseInitialized = async () => {
   if (!dbInitialized) {
     try {
       await initDatabase();
-      await seedDemoUser();
+      if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_DEMO_DATA === 'true') {
+        await seedDemoUser();
+      }
       dbInitialized = true;
     } catch (err) {
       console.error('Error during lazy DB initialization:', err);
@@ -119,6 +121,7 @@ app.delete('/api/shopping/:id', authenticateToken, shoppingCtrl.deleteItem);
 app.delete('/api/shopping/clear/completed', authenticateToken, shoppingCtrl.clearChecked);
 
 // 8. Subscription & Razorpay Payment Routes
+app.get('/api/subscriptions/plans', subCtrl.getPlans);
 app.get('/api/subscriptions/status', authenticateToken, subCtrl.getStatus);
 app.post('/api/subscriptions/create-order', authenticateToken, subCtrl.createCheckout);
 app.post('/api/subscriptions/verify-payment', authenticateToken, subCtrl.verifyPayment);

@@ -36,7 +36,11 @@ const scanReceipt = async (req, res) => {
     });
   } catch (error) {
     console.error('scanReceipt error:', error);
-    res.status(500).json({ success: false, message: 'Receipt extraction failed.' });
+    res.status(error.statusCode || 500).json({
+      success: false,
+      code: error.code || 'RECEIPT_SCAN_FAILED',
+      message: error.statusCode ? error.message : 'Receipt extraction failed. Please try again.'
+    });
   }
 };
 
@@ -57,7 +61,7 @@ const confirmReceipt = async (req, res) => {
       autoAddToPantry
     } = req.body;
 
-    if (!storeName || !totalAmount || !Array.isArray(items)) {
+    if (!storeName?.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(String(receiptDate || '')) || !Number.isFinite(Number(totalAmount)) || Number(totalAmount) < 0 || !Array.isArray(items)) {
       return res.status(400).json({ success: false, message: 'Missing required receipt details or items.' });
     }
 
@@ -76,7 +80,7 @@ const confirmReceipt = async (req, res) => {
       [
         req.user.id,
         storeName,
-        receiptDate || new Date().toISOString().slice(0, 10),
+        receiptDate,
         totalAmount,
         discountAmount || 0,
         taxAmount || 0,
@@ -128,7 +132,13 @@ const confirmReceipt = async (req, res) => {
     }
 
     // Update monthly eligible grocery spend for Bite Currency
-    const currentMonth = (receiptDate || new Date().toISOString()).slice(0, 7);
+    const currentMonth = receiptDate.slice(0, 7);
+    const monthlyGoals = await all(
+      'SELECT target_value, current_value, is_achieved FROM monthly_goals WHERE user_id = ? AND month_year = ?',
+      [req.user.id, currentMonth]
+    );
+    const achievedGoals = monthlyGoals.filter(goal => goal.is_achieved || goal.current_value >= goal.target_value).length;
+    const eligibleForReward = monthlyGoals.length > 0 && achievedGoals >= Math.ceil(monthlyGoals.length / 2);
     const existingReward = await get(
       `SELECT * FROM bite_currency_rewards WHERE user_id = ? AND month_year = ?`,
       [req.user.id, currentMonth]
@@ -136,17 +146,17 @@ const confirmReceipt = async (req, res) => {
 
     if (existingReward) {
       const newSpend = existingReward.eligible_grocery_spend + Number(totalAmount);
-      const newReward = +(newSpend * 0.075).toFixed(2);
+      const newReward = eligibleForReward ? +(newSpend * 0.075).toFixed(2) : 0;
       await run(
-        `UPDATE bite_currency_rewards SET eligible_grocery_spend = ?, currency_amount = ? WHERE id = ?`,
-        [newSpend, newReward, existingReward.id]
+        `UPDATE bite_currency_rewards SET eligible_grocery_spend = ?, currency_amount = ?, status = ? WHERE id = ?`,
+        [newSpend, newReward, eligibleForReward ? 'eligible' : 'in_progress', existingReward.id]
       );
     } else {
-      const reward = +(Number(totalAmount) * 0.075).toFixed(2);
+      const reward = eligibleForReward ? +(Number(totalAmount) * 0.075).toFixed(2) : 0;
       await run(
         `INSERT INTO bite_currency_rewards (user_id, month_year, eligible_grocery_spend, currency_amount, status)
-         VALUES (?, ?, ?, ?, 'in_progress')`,
-        [req.user.id, currentMonth, Number(totalAmount), reward]
+         VALUES (?, ?, ?, ?, ?)`,
+        [req.user.id, currentMonth, Number(totalAmount), reward, eligibleForReward ? 'eligible' : 'in_progress']
       );
     }
 

@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { foodDatabase } = require('../data/foodDatabase');
+const { generateGeminiContent, parseGeminiJson, GeminiServiceError } = require('./geminiClient');
 
 /**
  * Receipt OCR Service
@@ -8,6 +8,23 @@ const { foodDatabase } = require('../data/foodDatabase');
  * (Reliance Smart, Blinkit, Zepto, DMart, BigBasket, Nature's Basket).
  */
 const parseReceipt = async ({ filePath, mimeType, filename }) => {
+  const prompt = `Read this grocery receipt image or PDF. Return JSON only with this structure:
+{"storeName":"store name or Unknown store","receiptDate":"YYYY-MM-DD or null","totalAmount":0,"discountAmount":0,"taxAmount":0,"rawText":"visible text","items":[{"name":"exact visible product description","quantity":1,"unit":"pack","price":0,"category":"Grains & Pulses","isUncertain":false,"confidenceScore":0.9}]}
+Transcribe only information visible in the receipt. Do not invent products, prices, quantities, discounts, or totals. Each line item's price must be the amount printed for that line. Categories must be one of Grains & Pulses, Dairy & Eggs, Fresh Produce, Healthy Snacks, Pantry & Spices, Household, or Other. Mark uncertain items when text or amounts are unclear. If the receipt cannot be read, return an empty items array and explain that in rawText.`;
+
+  const text = await generateGeminiContent({
+    prompt,
+    filePath,
+    mimeType: mimeType || 'image/jpeg',
+    responseMimeType: 'application/json'
+  });
+  const parsed = parseGeminiJson(text);
+  if (!Array.isArray(parsed.items) || parsed.items.length === 0) {
+    throw new GeminiServiceError(parsed.rawText || 'No receipt line items could be read. Please upload a clearer image or PDF.', 422, 'RECEIPT_UNREADABLE');
+  }
+  return postProcessReceipt(parsed);
+
+  // Legacy filename-based sample receipts below are intentionally unreachable.
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (apiKey && mimeType.startsWith('image/')) {
@@ -124,37 +141,50 @@ const fallbackReceiptParser = ({ filename = "" }) => {
 };
 
 const postProcessReceipt = (receipt) => {
+  const allowedCategories = new Set(['Grains & Pulses', 'Dairy & Eggs', 'Fresh Produce', 'Healthy Snacks', 'Pantry & Spices', 'Household', 'Other']);
+  const items = receipt.items.map((item) => {
+    const name = typeof item.name === 'string' ? item.name.trim() : '';
+    const price = Number(item.price);
+    const quantity = Number(item.quantity || 1);
+    const confidence = Number(item.confidenceScore);
+    if (!name || !Number.isFinite(price) || price < 0 || !Number.isFinite(quantity) || quantity <= 0) {
+      throw new GeminiServiceError('Some receipt lines were missing a readable name, quantity, or price. Review the receipt or upload a clearer image.', 422, 'RECEIPT_LINE_UNCERTAIN');
+    }
+    return {
+      ...item,
+      name,
+      price,
+      quantity,
+      unit: typeof item.unit === 'string' && item.unit.trim() ? item.unit.trim() : 'unit',
+      category: allowedCategories.has(item.category) ? item.category : 'Other',
+      confidenceScore: Number.isFinite(confidence) ? Math.max(0, Math.min(confidence, 1)) : 0,
+      isUncertain: Boolean(item.isUncertain) || !Number.isFinite(confidence) || confidence < 0.75
+    };
+  });
+  const totalAmount = Number(receipt.totalAmount);
+  if (!Number.isFinite(totalAmount) || totalAmount < 0) {
+    throw new GeminiServiceError('The receipt total could not be read. Check the extracted lines and try a clearer image.', 422, 'RECEIPT_TOTAL_UNCERTAIN');
+  }
+
   // Category spending summary
   const categorySummary = {};
-  let estimatedTotalCalories = 0;
-  let estimatedTotalProtein = 0;
-
-  receipt.items.forEach(item => {
+  items.forEach(item => {
     categorySummary[item.category] = (categorySummary[item.category] || 0) + item.price;
-
-    // Approximate basket nutrition
-    if (item.category === "Grains & Pulses") {
-      estimatedTotalCalories += item.quantity * 1200;
-      estimatedTotalProtein += item.quantity * 45;
-    } else if (item.category === "Dairy & Eggs") {
-      estimatedTotalCalories += item.quantity * 650;
-      estimatedTotalProtein += item.quantity * 38;
-    } else if (item.category === "Fresh Produce") {
-      estimatedTotalCalories += item.quantity * 180;
-      estimatedTotalProtein += item.quantity * 6;
-    } else if (item.category === "Healthy Snacks") {
-      estimatedTotalCalories += item.quantity * 450;
-      estimatedTotalProtein += item.quantity * 12;
-    }
   });
 
   return {
     ...receipt,
-    itemsCount: receipt.items.length,
+    storeName: typeof receipt.storeName === 'string' && receipt.storeName.trim() ? receipt.storeName.trim() : 'Unknown store',
+    totalAmount,
+    discountAmount: Number.isFinite(Number(receipt.discountAmount)) ? Number(receipt.discountAmount) : 0,
+    taxAmount: Number.isFinite(Number(receipt.taxAmount)) ? Number(receipt.taxAmount) : 0,
+    items,
+    itemsCount: items.length,
     categorySummary,
-    estimatedTotalCalories: Math.round(estimatedTotalCalories),
-    estimatedTotalProtein: Math.round(estimatedTotalProtein),
-    pantryAddableCount: receipt.items.filter(i => i.category !== "Household").length
+    estimatedTotalCalories: null,
+    estimatedTotalProtein: null,
+    nutritionStatus: 'not_estimated_from_receipt',
+    pantryAddableCount: items.filter(i => i.category !== 'Household').length
   };
 };
 

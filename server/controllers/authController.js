@@ -5,6 +5,7 @@ const { JWT_SECRET } = require('../middleware/auth');
 
 const register = async (req, res) => {
   try {
+    if (!JWT_SECRET) return res.status(503).json({ success: false, message: 'Authentication is not configured. Set JWT_SECRET on the server.' });
     const { email, password, fullName, dietaryPreference, fitnessGoal } = req.body;
 
     if (!email || !password || !fullName) {
@@ -73,6 +74,7 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
+    if (!JWT_SECRET) return res.status(503).json({ success: false, message: 'Authentication is not configured. Set JWT_SECRET on the server.' });
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -219,52 +221,19 @@ const deleteAccount = async (req, res) => {
 };
 
 const forgotPassword = async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ success: false, message: 'Email is required.' });
-
-    const user = await get('SELECT id, email FROM users WHERE email = ?', [email.toLowerCase().trim()]);
-    if (!user) {
-      // Don't leak user existence in security best practice, but indicate success
-      return res.json({
-        success: true,
-        message: 'If an account exists with this email, a password reset link has been dispatched.',
-        resetToken: 'bitesize_demo_token_valid_15m'
-      });
-    }
-
-    // In demo / development environment, provide demo reset token for instant flow
-    res.json({
-      success: true,
-      message: 'Password reset code verified. Enter your new password.',
-      resetToken: `rst_${user.id}_${Date.now()}`
-    });
-  } catch (error) {
-    console.error('forgotPassword error:', error);
-    res.status(500).json({ success: false, message: 'Error processing password reset request.' });
-  }
+  return res.status(503).json({
+    success: false,
+    code: 'PASSWORD_RESET_NOT_CONFIGURED',
+    message: 'Password reset is unavailable until a secure email delivery provider is configured.'
+  });
 };
 
 const resetPassword = async (req, res) => {
-  try {
-    const { email, newPassword } = req.body;
-    if (!email || !newPassword) {
-      return res.status(400).json({ success: false, message: 'Email and new password are required.' });
-    }
-
-    const user = await get('SELECT id FROM users WHERE email = ?', [email.toLowerCase().trim()]);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'No account found with this email.' });
-    }
-
-    const passwordHash = await bcrypt.hash(newPassword, 10);
-    await run('UPDATE users SET password_hash = ? WHERE id = ?', [passwordHash, user.id]);
-
-    res.json({ success: true, message: 'Password has been successfully updated! You can now log in.' });
-  } catch (error) {
-    console.error('resetPassword error:', error);
-    res.status(500).json({ success: false, message: 'Failed to reset password.' });
-  }
+  return res.status(503).json({
+    success: false,
+    code: 'PASSWORD_RESET_NOT_CONFIGURED',
+    message: 'Password reset is unavailable until a secure email delivery provider is configured.'
+  });
 };
 
 module.exports = {

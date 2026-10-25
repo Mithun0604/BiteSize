@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { foodDatabase, findFoodById } = require('../data/foodDatabase');
+const { GeminiServiceError, generateGeminiContent, parseGeminiJson } = require('./geminiClient');
 
 /**
  * Intelligent Image Buffer Feature Extraction
@@ -76,83 +77,22 @@ function analyzeImageBuffer(buffer) {
   };
 }
 
-/**
- * AI Vision Analysis for Meal Photos
- * Supports Gemini Vision API (1.5-flash, 2.0-flash, 1.5-pro) when key is present,
- * with multi-candidate fallback powered by image buffer inspection and verified IFCT/USDA nutrition.
- */
-const analyzeMealImage = async ({ imagePath, mimeType, filename }) => {
-  const apiKey = process.env.GEMINI_API_KEY;
+/** Analyze a meal image with Gemini and ground all nutrition in the curated food database. */
+const analyzeMealImage = async ({ imagePath, mimeType }) => {
+  const catalog = foodDatabase.map(food => ({ id: food.id, name: food.name }));
+  const prompt = `Analyze this meal photo for BiteSize. This is an estimate, not a measurement.
+Choose up to three plausible matches ONLY from this catalog. Return JSON with:
+{"candidates":[{"foodId":"catalog id","confidence":0.0,"estimatedGrams":150}],"clarificationNeeded":["question"],"defaultCookingMethod":"unknown or observed method"}.
+If the image is unclear, not food, a mixed meal that cannot be represented by a catalog entry, or you cannot confidently identify a match, return an empty candidates array and explain what the user should clarify. Never invent a catalog id, ingredients, nutrition values, or exact portion measurement. Estimate portion grams conservatively and ask the user to confirm. Do not infer cooking oil or sauces.
+Catalog: ${JSON.stringify(catalog)}`;
 
-  if (apiKey) {
-    try {
-      const { GoogleGenerativeAI } = require('@google/generative-ai');
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-      const imageBuffer = fs.readFileSync(imagePath);
-      const imagePart = {
-        inlineData: {
-          data: imageBuffer.toString("base64"),
-          mimeType: mimeType || "image/jpeg"
-        }
-      };
-
-      const prompt = `You are a certified nutrition AI analyzing food images for BiteSize.
-Look at this meal image very carefully.
-Identify the food items, preparation methods (e.g. raw, grilled, boiled, fried), and estimate portion size in grams.
-Also return alternative candidate interpretations if there is visual ambiguity (e.g., grilled chicken breast vs raw breast vs baked chicken vs tofu steak).
-
-Return STRICT JSON only matching this schema:
-{
-  "primaryMealName": "Skinless Chicken Breast (Grilled)",
-  "confidenceScore": 0.88,
-  "confidenceLevel": "high",
-  "uncertaintyRange": "±10%",
-  "candidates": [
-    {
-      "name": "Skinless Chicken Breast (Grilled)",
-      "confidence": 0.88,
-      "estimatedGrams": 150,
-      "foodCategory": "Poultry & Meat",
-      "isRaw": false
-    },
-    {
-      "name": "Skinless Chicken Breast (Boiled / Poached)",
-      "confidence": 0.80,
-      "estimatedGrams": 150,
-      "foodCategory": "Poultry & Meat",
-      "isRaw": false
-    },
-    {
-      "name": "Raw Skinless Chicken Breast",
-      "confidence": 0.74,
-      "estimatedGrams": 150,
-      "foodCategory": "Poultry & Meat",
-      "isRaw": true
-    }
-  ],
-  "clarificationNeeded": [
-    "Was any oil, butter or ghee used during cooking?",
-    "Confirm if portion matches standard 150g breast piece."
-  ],
-  "defaultCookingMethod": "Grilled"
-}`;
-
-      const result = await model.generateContent([prompt, imagePart]);
-      const response = await result.response;
-      const text = response.text().trim();
-      const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
-      const parsed = JSON.parse(cleanJson);
-
-      return buildMultiCandidateResponse(parsed);
-    } catch (apiErr) {
-      console.warn("Gemini Vision API fallback triggered:", apiErr.message);
-    }
-  }
-
-  // Multitier offline food image analyzer with image buffer heuristics
-  return fallbackMultiCandidateAnalyzer({ imagePath, filename });
+  const text = await generateGeminiContent({
+    prompt,
+    filePath: imagePath,
+    mimeType: mimeType || 'image/jpeg',
+    responseMimeType: 'application/json'
+  });
+  return buildMultiCandidateResponse(parseGeminiJson(text));
 };
 
 /**
@@ -579,44 +519,50 @@ function generatePresetCandidates(archetype, bufferAnalysis) {
  * Normalizes Gemini response into multi-candidate structure with verified database grounding
  */
 function buildMultiCandidateResponse(parsed) {
-  const geminiCandidates = parsed.candidates || [
-    { name: parsed.primaryMealName || "Nutritious Plate", confidence: parsed.confidenceScore || 0.88, estimatedGrams: 150 }
-  ];
+  const matches = (Array.isArray(parsed.candidates) ? parsed.candidates : [])
+    .map(candidate => {
+      const food = foodDatabase.find(item => item.id === candidate.foodId);
+      const confidence = Number(candidate.confidence);
+      const grams = Number(candidate.estimatedGrams);
+      if (!food || !Number.isFinite(confidence) || confidence < 0.65 || confidence > 1 || !Number.isFinite(grams) || grams < 25 || grams > 1200) return null;
+      const factor = grams / 100;
+      return {
+        candidateId: food.id,
+        name: food.name,
+        category: food.category,
+        confidence,
+        isTop: false,
+        portionGrams: grams,
+        servingDescription: `${grams}g estimated portion`,
+        per100g: food.per100g,
+        micronutrients: food.micronutrients,
+        approxCostPerKg: food.approxCostPerKg,
+        tags: food.tags,
+        calculated: {
+          calories: Math.round(food.per100g.calories * factor),
+          protein: +(food.per100g.protein * factor).toFixed(1),
+          carbs: +(food.per100g.carbs * factor).toFixed(1),
+          fat: +(food.per100g.fat * factor).toFixed(1),
+          fiber: +(food.per100g.fiber * factor).toFixed(1),
+          sugar: +(food.per100g.sugar * factor).toFixed(1),
+          sodium: Math.round(food.per100g.sodium * factor)
+        }
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 3);
 
-  const enrichedCandidates = geminiCandidates.map((cand, idx) => {
-    const q = cand.name.toLowerCase();
-    const food = foodDatabase.find(f =>
-      q.includes(f.id.replace(/_/g, ' ')) ||
-      q.includes(f.name.toLowerCase()) ||
-      f.name.toLowerCase().includes(q)
-    ) || foodDatabase[0];
+  if (!matches.length) {
+    const clarification = Array.isArray(parsed.clarificationNeeded) ? parsed.clarificationNeeded.find(item => typeof item === 'string') : null;
+    throw new GeminiServiceError(
+      clarification || 'I could not confidently identify this meal from the photo. Try a clearer photo or add it manually in your Food Diary.',
+      422,
+      'FOOD_UNCERTAIN'
+    );
+  }
 
-    const grams = cand.estimatedGrams || food.standardServingGrams || 150;
-    const factor = grams / 100;
-
-    return {
-      candidateId: food.id,
-      name: cand.name,
-      category: food.category,
-      confidence: cand.confidence || 0.85,
-      isTop: idx === 0,
-      portionGrams: grams,
-      servingDescription: `${grams}g portion`,
-      per100g: food.per100g,
-      micronutrients: food.micronutrients,
-      approxCostPerKg: food.approxCostPerKg,
-      tags: food.tags,
-      calculated: {
-        calories: Math.round(food.per100g.calories * factor),
-        protein: +(food.per100g.protein * factor).toFixed(1),
-        carbs: +(food.per100g.carbs * factor).toFixed(1),
-        fat: +(food.per100g.fat * factor).toFixed(1),
-        fiber: +(food.per100g.fiber * factor).toFixed(1),
-        sugar: +(food.per100g.sugar * factor).toFixed(1),
-        sodium: Math.round(food.per100g.sodium * factor)
-      }
-    };
-  });
+  matches[0].isTop = true;
+  const enrichedCandidates = matches;
 
   const top = enrichedCandidates[0];
 
@@ -625,14 +571,11 @@ function buildMultiCandidateResponse(parsed) {
     primaryCandidateId: top.candidateId,
     confidenceScore: top.confidence,
     confidenceLevel: top.confidence >= 0.85 ? "high" : "medium",
-    uncertaintyRange: parsed.uncertaintyRange || "±10%",
+    uncertaintyRange: top.confidence >= 0.85 ? '±15%' : '±25%',
     isAIEstimated: true,
     verifiedDataSource: "IFCT (ICMR-NIN) & USDA FoodData Central",
-    clarificationNeeded: parsed.clarificationNeeded || [
-      "Confirm if cooking oil or butter was added during preparation.",
-      "Check if portion weight matches your plate size."
-    ],
-    cookingMethod: parsed.defaultCookingMethod || "Grilled / Sautéed",
+    clarificationNeeded: Array.isArray(parsed.clarificationNeeded) ? parsed.clarificationNeeded : ['Confirm the portion size and any added oil, butter, sauce, or toppings.'],
+    cookingMethod: parsed.defaultCookingMethod || 'Not identified',
     availableCookingMethods: [
       { name: "Grilled / Pan-Seared", calorieFactor: 1.0, fatGrams: 0 },
       { name: "Boiled / Poached", calorieFactor: 0.95, fatGrams: -0.4 },

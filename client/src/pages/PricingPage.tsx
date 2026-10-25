@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { subApi } from '../services/api';
+import { openRazorpayCheckout } from '../services/razorpayCheckout';
 import {
   Check,
   Sparkles,
@@ -20,8 +21,14 @@ interface PricingPageProps {
 
 export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
   const { user } = useAuth();
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
+  const [plans, setPlans] = useState<any[]>([]);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  useEffect(() => {
+    subApi.getPlans().then((response: any) => setPlans(response.plans || [])).catch(() => setPlans([]));
+  }, []);
+
+  const priceFor = (planId: string) => plans.find(plan => plan.id === planId)?.price;
 
   const handleSelectPlan = async (planId: string) => {
     if (!user) {
@@ -38,13 +45,25 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
     try {
       const res = await subApi.createCheckout(planId);
       if (res.success) {
-        // Complete mock checkout in sandbox mode
-        await subApi.verifyPayment({
-          orderId: res.orderId,
-          paymentId: `pay_mock_${Date.now()}`,
-          signature: 'sandbox_verified_signature'
-        });
-        alert(`Successfully upgraded to ${planId === 'big_bite' ? 'Big Bite' : 'Shared Bite'}! Welcome to BiteSize Premium.`);
+        if (res.isSandbox) {
+          await subApi.verifyPayment({
+            razorpayPaymentId: `pay_sandbox_${Date.now()}`,
+            razorpayOrderId: res.orderId,
+            razorpaySignature: '',
+            planId
+          });
+          alert(`TEST MODE: no payment was processed. ${planId === 'big_bite' ? 'Big Bite' : 'Shared Bite'} test access is now active.`);
+        } else {
+          const payment = await openRazorpayCheckout(res);
+          if (!payment) return;
+          await subApi.verifyPayment({
+            razorpayPaymentId: payment.razorpay_payment_id,
+            razorpayOrderId: payment.razorpay_order_id,
+            razorpaySignature: payment.razorpay_signature,
+            planId
+          });
+          alert(`Payment verified. ${planId === 'big_bite' ? 'Big Bite' : 'Shared Bite'} is active.`);
+        }
         window.location.reload();
       }
     } catch (err: any) {
@@ -54,12 +73,10 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
     }
   };
 
-  const isAnnual = billingCycle === 'annual';
-
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
       
-      {/* Title & Billing Toggle */}
+      {/* Title */}
       <div className="text-center space-y-4 max-w-2xl mx-auto">
         <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#C75A3B]/10 text-[#C75A3B] text-xs font-semibold">
           <Sparkles className="w-3.5 h-3.5" />
@@ -72,34 +89,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
           Start free with Small Bite or unlock unlimited AI meal vision, receipt intelligence, and family sharing.
         </p>
 
-        {/* Monthly vs Annual Toggle */}
-        <div className="flex items-center justify-center space-x-3 pt-4">
-          <div className="bg-[#FAF8F4] dark:bg-slate-800 p-1.5 rounded-2xl border border-[#E8E6E1] dark:border-slate-700 flex items-center space-x-1 shadow-sm">
-            <button
-              onClick={() => setBillingCycle('monthly')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                !isAnnual
-                  ? 'bg-white dark:bg-slate-700 text-[#2E2E2E] dark:text-white shadow-sm'
-                  : 'text-[#5B6B7A]'
-              }`}
-            >
-              Monthly Billing
-            </button>
-            <button
-              onClick={() => setBillingCycle('annual')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
-                isAnnual
-                  ? 'bg-[#C75A3B] text-white shadow-sm'
-                  : 'text-[#5B6B7A]'
-              }`}
-            >
-              <span>Annual Billing</span>
-              <span className="text-[10px] bg-white/20 text-white px-1.5 py-0.5 rounded-full font-extrabold">
-                Save 16%
-              </span>
-            </button>
-          </div>
-        </div>
+        <p className="text-xs text-[#5B6B7A] dark:text-slate-400 pt-2">Monthly plans. Prices are supplied by the server.</p>
       </div>
 
       {/* Pricing Cards Grid */}
@@ -132,7 +122,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
               </li>
               <li className="flex items-center space-x-2">
                 <Check className="w-4 h-4 text-[#2E7D6B] shrink-0" />
-                <span>5 grocery receipt scans per month</span>
+                <span>3 grocery receipt scans per month</span>
               </li>
               <li className="flex items-center space-x-2">
                 <Check className="w-4 h-4 text-[#2E7D6B] shrink-0" />
@@ -176,10 +166,10 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
 
             <div className="pt-2">
               <span className="font-serif text-4xl font-extrabold text-[#C75A3B]">
-                {isAnnual ? '₹1,999' : '₹199'}
+                {priceFor('big_bite') == null ? '—' : `₹${Number(priceFor('big_bite')).toLocaleString('en-IN')}`}
               </span>
               <span className="text-xs text-[#5B6B7A] dark:text-slate-400">
-                {isAnnual ? ' / year (~₹166/mo)' : ' / month'}
+                {' / month'}
               </span>
             </div>
 
@@ -235,10 +225,10 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
 
             <div className="pt-2">
               <span className="font-serif text-4xl font-extrabold text-[#5B6B7A] dark:text-white">
-                {isAnnual ? '₹3,999' : '₹399'}
+                {priceFor('shared_bite') == null ? '—' : `₹${Number(priceFor('shared_bite')).toLocaleString('en-IN')}`}
               </span>
               <span className="text-xs text-[#5B6B7A] dark:text-slate-400">
-                {isAnnual ? ' / year (~₹333/mo)' : ' / month'}
+                {' / month'}
               </span>
             </div>
 
@@ -289,8 +279,8 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
               <tr className="border-b border-[#E8E6E1] dark:border-slate-700 text-[#5B6B7A]">
                 <th className="py-3 font-bold">Feature</th>
                 <th className="py-3 font-bold text-center">Small Bite (Free)</th>
-                <th className="py-3 font-bold text-center text-[#C75A3B]">Big Bite (₹199/mo)</th>
-                <th className="py-3 font-bold text-center">Shared Bite (₹399/mo)</th>
+                <th className="py-3 font-bold text-center text-[#C75A3B]">Big Bite ({priceFor('big_bite') == null ? '—' : `₹${Number(priceFor('big_bite')).toLocaleString('en-IN')}`}/mo)</th>
+                <th className="py-3 font-bold text-center">Shared Bite ({priceFor('shared_bite') == null ? '—' : `₹${Number(priceFor('shared_bite')).toLocaleString('en-IN')}`}/mo)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E8E6E1] dark:divide-slate-700">

@@ -542,7 +542,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
             </span>
             <h3 className="font-serif text-2xl font-bold text-white">{suggestedMeal.title}</h3>
             <p className="text-xs text-stone-300 leading-relaxed">
-              Uses your available {suggestedMeal.requiredIngredients.map((i: any) => i.name).join(', ')}. Takes {suggestedMeal.prepTimeMinutes + suggestedMeal.cookTimeMinutes} minutes and gives {suggestedMeal.nutritionPerServing.protein}g protein!
+              Matches pantry items: {suggestedMeal.matchedIngredients.join(', ')} ({suggestedMeal.matchPercentage}% ingredient match). Takes {suggestedMeal.prepTimeMinutes + suggestedMeal.cookTimeMinutes} minutes; nutrition is an estimate per serving.
             </p>
           </div>
           <button

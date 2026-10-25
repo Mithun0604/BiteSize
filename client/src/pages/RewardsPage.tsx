@@ -80,7 +80,7 @@ export const RewardsPage: React.FC<RewardsProps> = ({ onNavigate }) => {
           Bite Currency & Partner Rewards
         </h1>
         <p className="text-xs text-[#5B6B7A] dark:text-slate-400 max-w-2xl leading-relaxed">
-          Reach your monthly wellness and budget milestones to earn Bite Currency worth <strong>7.5% of your eligible monthly grocery bill</strong>, redeemable for organic staples through partner platform First Club.
+          Meet this month’s goals to see an illustrative <strong>7.5% reward estimate</strong>. First Club is not integrated; preview codes cannot be redeemed and do not spend your balance.
         </p>
       </div>
 
@@ -96,16 +96,16 @@ export const RewardsPage: React.FC<RewardsProps> = ({ onNavigate }) => {
         <div className="p-6 rounded-3xl bg-gradient-to-br from-[#FAF8F4] to-[#F6D6C9]/40 border-2 border-[#D4A85A] shadow-lg space-y-3 animate-fade-in">
           <div className="flex items-center space-x-2 text-[#2E7D6B] font-bold text-sm">
             <CheckCircle2 className="w-5 h-5" />
-            <span>Voucher Successfully Claimed!</span>
+            <span>Demo preview code generated</span>
           </div>
           <p className="text-xs text-[#2E2E2E]">
-            Here is your exclusive voucher for <strong>{redeemedVoucher?.title}</strong>:
+            This non-redeemable preview is for <strong>{redeemedVoucher?.title}</strong>:
           </p>
           <div className="inline-block px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border-2 border-dashed border-[#D4A85A] font-mono text-base font-black text-[#C75A3B] tracking-wider select-all">
             {redeemedCode}
           </div>
           <p className="text-[11px] text-[#5B6B7A]">
-            Apply this code at First Club checkout to deduct {redeemedVoucher?.requiredCurrency} INR from your order.
+            First Club is not connected. This code will not work at checkout; your Bite Currency balance was not changed.
           </p>
         </div>
       )}
@@ -117,7 +117,7 @@ export const RewardsPage: React.FC<RewardsProps> = ({ onNavigate }) => {
         <div className="md:col-span-2 bg-gradient-to-br from-white to-[#FAF8F4] dark:from-slate-800 dark:to-slate-900 p-6 sm:p-8 rounded-3xl border border-[#E8E6E1] dark:border-slate-700 shadow-soft flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="space-y-3">
             <span className="text-[10px] font-bold uppercase tracking-wider text-[#D4A85A]">
-              Earned Bite Currency
+              Potential Demo Reward
             </span>
             <div className="flex items-baseline space-x-2">
               <span className="text-4xl sm:text-5xl font-black text-[#2E2E2E] dark:text-white">
@@ -126,7 +126,7 @@ export const RewardsPage: React.FC<RewardsProps> = ({ onNavigate }) => {
               <span className="text-xs text-[#5B6B7A]">Bite Currency</span>
             </div>
             <p className="text-xs text-[#5B6B7A] dark:text-slate-400">
-              Calculated as <strong>7.5%</strong> of ₹{currentReward?.eligible_grocery_spend?.toLocaleString('en-IN') || 0} in verified grocery receipts this month.
+              {goalsProgress?.isEligibleForRedemption ? 'Illustrative 7.5% of saved receipt spend after goals are met.' : 'No reward is earned until the monthly goal threshold is met.'} Receipt spend: ₹{currentReward?.eligible_grocery_spend?.toLocaleString('en-IN') || 0}.
             </p>
           </div>
 
@@ -217,10 +217,10 @@ export const RewardsPage: React.FC<RewardsProps> = ({ onNavigate }) => {
           <div>
             <h3 className="font-serif text-xl font-bold text-[#2E2E2E] dark:text-white flex items-center space-x-2">
               <Gift className="w-5 h-5 text-[#D4A85A]" />
-              <span>Redeem with First Club</span>
+              <span>Preview First Club Rewards</span>
             </h3>
             <p className="text-xs text-[#5B6B7A] dark:text-slate-400">
-              Sponsored partner redemptions for certified organic oils, pulses, and wellness groceries.
+              Demo catalog only. No partner redemption service is connected.
             </p>
           </div>
           <span className="text-[10px] px-2.5 py-1 rounded-full bg-stone-200 dark:bg-slate-700 text-stone-700 dark:text-stone-300 font-semibold">
@@ -257,7 +257,7 @@ export const RewardsPage: React.FC<RewardsProps> = ({ onNavigate }) => {
                     disabled={!canAfford}
                     className="px-4 py-2 rounded-xl text-xs font-bold bg-[#C75A3B] text-white hover:bg-[#b0482b] disabled:opacity-40 transition-transform hover:scale-105"
                   >
-                    {canAfford ? 'Redeem Voucher' : 'Need More Currency'}
+                    {canAfford ? 'Generate demo code' : 'Need More Currency'}
                   </button>
                 </div>
               </div>

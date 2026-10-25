@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { subApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { openRazorpayCheckout } from '../services/razorpayCheckout';
 import {
   ShieldCheck,
   CheckCircle2,
@@ -42,6 +43,11 @@ export const SubscriptionsPage: React.FC<SubscriptionsProps> = ({ onNavigate }) 
     fetchStatus();
   }, []);
 
+  const priceFor = (planId: string) => {
+    const price = subStatus?.plans?.find((plan: any) => plan.id === planId)?.price;
+    return Number.isFinite(Number(price)) ? `₹${Number(price).toLocaleString('en-IN')}` : '—';
+  };
+
   const handleUpgrade = async (planId: string) => {
     setProcessingPlanId(planId);
     setErrorMessage(null);
@@ -61,18 +67,28 @@ export const SubscriptionsPage: React.FC<SubscriptionsProps> = ({ onNavigate }) 
           razorpayPaymentId: `pay_sandbox_${Date.now()}`,
           razorpayOrderId: orderRes.orderId,
           razorpaySignature: 'sandbox_verified_sig',
-          planId,
-          isSandbox: true
+          planId
         });
 
+        if (verifyRes.success) {
+          setStatusMessage(`${verifyRes.message} ${verifyRes.data?.paymentNotice || 'TEST MODE: no payment was processed.'}`);
+          updateUserPlan(planId as any);
+          fetchStatus();
+        }
+      } else {
+        const payment = await openRazorpayCheckout(orderRes);
+        if (!payment) return;
+        const verifyRes = await subApi.verifyPayment({
+          razorpayPaymentId: payment.razorpay_payment_id,
+          razorpayOrderId: payment.razorpay_order_id,
+          razorpaySignature: payment.razorpay_signature,
+          planId
+        });
         if (verifyRes.success) {
           setStatusMessage(verifyRes.message);
           updateUserPlan(planId as any);
           fetchStatus();
         }
-      } else {
-        // Live Razorpay popup (if key configured)
-        alert(`Opening Razorpay checkout for ${orderRes.currency} ${orderRes.amount / 100}`);
       }
     } catch (err: any) {
       setErrorMessage(err.message || 'Payment initiation failed.');
@@ -161,7 +177,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsProps> = ({ onNavigate }) 
             )}
             <span className="text-[10px] text-[#5B6B7A] flex items-center space-x-1">
               <Lock className="w-3 h-3 text-[#2E7D6B]" />
-              <span>Razorpay Verified Sandbox Gateway</span>
+              <span>{subStatus.paymentMode === 'sandbox' ? 'TEST MODE — no payments processed' : 'Razorpay live checkout'}</span>
             </span>
           </div>
         </div>
@@ -216,7 +232,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsProps> = ({ onNavigate }) 
           <div>
             <span className="text-xs font-semibold text-[#C75A3B] uppercase tracking-wider">Premium Individual</span>
             <h3 className="font-serif text-2xl font-bold text-[#2E2E2E] dark:text-white mt-1">Big Bite</h3>
-            <p className="text-3xl font-extrabold text-[#2E2E2E] dark:text-white mt-4">₹199 <span className="text-xs font-normal text-[#5B6B7A]">/ month</span></p>
+            <p className="text-3xl font-extrabold text-[#2E2E2E] dark:text-white mt-4">{priceFor('big_bite')} <span className="text-xs font-normal text-[#5B6B7A]">/ month</span></p>
             <p className="text-xs text-[#5B6B7A] dark:text-slate-400 mt-2">The best-value plan for ongoing personal nutrition and grocery budget coaching.</p>
 
             <div className="border-t border-[#E8E6E1] dark:border-slate-700 my-6"></div>
@@ -254,7 +270,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsProps> = ({ onNavigate }) 
             disabled={user?.plan === 'big_bite' || processingPlanId === 'big_bite'}
             className="mt-8 w-full py-3.5 rounded-xl font-bold text-xs bg-[#C75A3B] text-white hover:bg-[#b0482b] transition-all shadow-md shadow-[#C75A3B]/25 disabled:opacity-50"
           >
-            {user?.plan === 'big_bite' ? 'Active Current Plan' : processingPlanId === 'big_bite' ? 'Processing Checkout...' : 'Upgrade to Big Bite (₹199)'}
+            {user?.plan === 'big_bite' ? 'Active Current Plan' : processingPlanId === 'big_bite' ? 'Processing Checkout...' : `Upgrade to Big Bite (${priceFor('big_bite')})`}
           </button>
         </div>
 
@@ -263,7 +279,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsProps> = ({ onNavigate }) 
           <div>
             <span className="text-xs font-semibold text-[#5B6B7A] uppercase tracking-wider">Premium Family</span>
             <h3 className="font-serif text-2xl font-bold text-[#2E2E2E] dark:text-white mt-1">Shared Bite</h3>
-            <p className="text-3xl font-extrabold text-[#2E2E2E] dark:text-white mt-4">₹399 <span className="text-xs font-normal text-[#5B6B7A]">/ month</span></p>
+            <p className="text-3xl font-extrabold text-[#2E2E2E] dark:text-white mt-4">{priceFor('shared_bite')} <span className="text-xs font-normal text-[#5B6B7A]">/ month</span></p>
             <p className="text-xs text-[#5B6B7A] dark:text-slate-400 mt-2">Coordinated grocery planning under one shared household budget with private personal meal logs.</p>
 
             <div className="border-t border-[#E8E6E1] dark:border-slate-700 my-6"></div>
@@ -293,7 +309,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsProps> = ({ onNavigate }) 
             disabled={user?.plan === 'shared_bite' || processingPlanId === 'shared_bite'}
             className="mt-8 w-full py-3.5 rounded-xl font-bold text-xs bg-[#5B6B7A] text-white hover:bg-[#495764] transition-all disabled:opacity-50"
           >
-            {user?.plan === 'shared_bite' ? 'Active Current Plan' : processingPlanId === 'shared_bite' ? 'Processing Checkout...' : 'Upgrade to Shared Bite (₹399)'}
+            {user?.plan === 'shared_bite' ? 'Active Current Plan' : processingPlanId === 'shared_bite' ? 'Processing Checkout...' : `Upgrade to Shared Bite (${priceFor('shared_bite')})`}
           </button>
         </div>
       </div>

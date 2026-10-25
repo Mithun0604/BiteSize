@@ -44,13 +44,13 @@ BiteSize bridges the gap between what people buy, what they eat, and what they c
 
 ### 6. Subscription System (Razorpay Integration)
 - **Small Bite (Free)**: 3 receipt scans/mo, 10 meal scans/mo, 1 profile, baseline tracking.
-- **Big Bite (₹199/month)**: Unlimited receipt & meal scans, full AI Coach, What-If comparisons, meal planning, Bite Currency rewards.
-- **Shared Bite (₹399/month)**: Everything in Big Bite + up to 5 family member profiles, shared household grocery budget & pantry, and confidential individual meal logs.
+- **Big Bite (₹199/month default)**: Higher receipt & meal scan limits, AI Coach, What-If comparisons, meal planning, and Bite Currency tracking.
+- **Shared Bite (₹399/month default)**: Big Bite features plus up to 5 household member records and shared budget/pantry tools. Member records do not yet have separate sign-ins or role-based access.
 - **Verified Payment Handling**: Server-side plan limit enforcement, signature verification, and sandbox test mode.
 
 ### 7. Bite Currency Rewards & First Club Partner Program
-- **7.5% Grocery Bill Reward**: Meeting monthly wellness and budget milestones unlocks 7.5% of eligible grocery spend in Bite Currency.
-- **First Club Redemption Catalog**: Redeem Bite Currency for genuine voucher claim codes (₹100, ₹250, ₹500 off organic groceries).
+- **7.5% Grocery Bill Reward**: The illustrative reward is shown only after configured monthly goals are met.
+- **First Club Demo Catalog**: Preview codes are simulated and cannot be redeemed; no partner integration is configured.
 
 ---
 
@@ -73,8 +73,9 @@ Built to strictly match the BiteSize Brand Identity guidelines:
 - **Frontend**: React 18, TypeScript, Tailwind CSS v4, Lucide React icons, Canvas Confetti.
 - **Backend**: Node.js & Express REST API with input validation, JWT session management, bcryptjs password hashing, and Multer file upload handling.
 - **Database**:
-  - **SQLite (Default Persistent Store)**: Zero-config, persistent `server/bitesize.db` with foreign keys, indexing, and seed data.
-  - **MySQL 8.0 (Production Ready)**: Complete schema DDL provided in `server/config/schema.sql`.
+  - **SQLite**: Local development database at `server/bitesize.db` with foreign keys and seed data.
+  - **MySQL**: A reference schema is provided in `server/config/schema.sql`, but the current API runtime does not connect to MySQL.
+  - **Production storage**: Vercel uses temporary `/tmp` storage for SQLite and uploads. Use a persistent database and object storage before relying on saved production data.
 
 ---
 
@@ -109,13 +110,15 @@ Open **[http://localhost:5000](http://localhost:5000)** in your browser!
 
 ---
 
-## 👤 Instant Demo Login Credentials
+## 👤 Local Demo Login Credentials
 
-The database comes pre-seeded with authentic Indian grocery receipts (Reliance Smart Bazaar, Blinkit), daily meal photo entries, pantry inventory, monthly budget, and Bite Currency rewards:
+In non-production development, the database is seeded with sample grocery receipts, meal entries, pantry inventory, budget, and rewards:
 
 - **Email**: `demo@bitesize.app`
 - **Password**: `bitesize123`
 *(Or click the 1-Click "Sign In as Aarav (Demo User)" button on the login screen!)*
+
+The demo account is not seeded in production deployments.
 
 ---
 
@@ -123,18 +126,21 @@ The database comes pre-seeded with authentic Indian grocery receipts (Reliance S
 
 ```env
 PORT=5000
-JWT_SECRET=bitesize_super_secret_jwt_key_2026
+JWT_SECRET=replace-with-a-long-random-secret
 
-# Optional: Google Gemini API Key for multimodal Vision & AI Coach
-# (If omitted, intelligent local nutrition & vision engine runs automatically)
+# Required for AI meal scanning, receipt OCR, and personalized AI Coach responses.
+# Without a key, these features report that setup is required; they do not generate sample results.
 GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash
 
-# Optional: Razorpay Payment Keys
-# (If omitted, verified sandbox test mode runs automatically)
+# Configure both for live Razorpay checkout. Sandbox is disabled in production by default.
 RAZORPAY_KEY_ID=
 RAZORPAY_KEY_SECRET=
+ENABLE_SANDBOX_PAYMENTS=false
+BIG_BITE_PRICE_INR=199
+SHARED_BITE_PRICE_INR=399
 
-# Optional: External MySQL Server Configuration
+# Local SQLite is used by the current runtime; these MySQL values are not yet consumed.
 MYSQL_HOST=localhost
 MYSQL_PORT=3306
 MYSQL_USER=root
@@ -142,16 +148,18 @@ MYSQL_PASSWORD=
 MYSQL_DATABASE=bitesize_db
 ```
 
+Set `JWT_SECRET`, `GEMINI_API_KEY`, and both Razorpay keys in Vercel before enabling authenticated production features. Password recovery remains disabled until secure reset-email delivery and one-time token verification are implemented. The current runtime still uses ephemeral SQLite and `/tmp` uploads on Vercel, so it is not ready for persistent production user data.
+
 ---
 
-## 🧪 Testing Verified Workflows
+## 🧪 Manual Workflow Checks
 
-1. **Authentication**: Register a new user with custom dietary preferences and fitness targets, or use the 1-click demo login.
-2. **Meal Scanner**: Navigate to "Scan Meal", upload any food photo, review the confidence rating and IFCT nutrition breakdown, adjust portion slider or cooking oil, and click "Confirm & Save to Daily Log".
-3. **Receipt Scanner**: Upload a receipt image or PDF, inspect OCR line items, verify uncertain match flags, and watch ingredients auto-sync to your Pantry.
-4. **AI Coach**: Chat with the coach regarding recipes or budget limits; witness contextually grounded responses citing your live pantry items and spending.
+1. **Authentication**: Register a new user with custom dietary preferences and fitness targets, or use the local demo account.
+2. **Meal Scanner**: Configure `GEMINI_API_KEY`, upload a food photo, confirm the identified food and portion, then save to the daily log. Nutrition is calculated from the curated food database.
+3. **Receipt Scanner**: Configure `GEMINI_API_KEY`, upload a receipt image or PDF, review extracted lines and uncertain matches, then confirm.
+4. **AI Coach**: Configure `GEMINI_API_KEY` and ask about saved pantry, meal, and budget data.
 5. **"What If I Changed This?"**: Compare White Rice vs. Quinoa or Potato Chips vs. Roasted Makhana, review exact cost/calorie/protein differences, and click "Add to Shopping List".
 6. **Pantry-to-Plate**: View expiry alerts, click "Cook this meal" to deduct quantities, or click "Add Missing Items" to update your smart shopping list.
-7. **Subscription Upgrades**: Switch between Small Bite, Big Bite, and Shared Bite with verified sandbox Razorpay checkout.
-8. **Bite Currency Rewards**: Track monthly milestone progress, see your 7.5% grocery reward, and claim First Club partner vouchers with generated claim codes.
+7. **Subscription Upgrades**: Use clearly labelled sandbox checkout in local development, or configure live Razorpay credentials and test the live Checkout callback.
+8. **Bite Currency Rewards**: Track goal eligibility and the illustrative 7.5% grocery reward. First Club preview codes are not redeemable.
 9. **Data Export**: Export your personal nutrition and grocery spending history as CSV or JSON in 1 click.

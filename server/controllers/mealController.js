@@ -38,7 +38,11 @@ const scanMeal = async (req, res) => {
     });
   } catch (error) {
     console.error('scanMeal error:', error);
-    res.status(500).json({ success: false, message: 'Meal photo analysis failed. Please try again.' });
+    res.status(error.statusCode || 500).json({
+      success: false,
+      code: error.code || 'MEAL_SCAN_FAILED',
+      message: error.statusCode ? error.message : 'Meal photo analysis failed. Please try again.'
+    });
   }
 };
 

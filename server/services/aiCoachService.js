@@ -1,5 +1,5 @@
 const { all, get } = require('../config/database');
-const { recipeDatabase } = require('../data/recipeDatabase');
+const { generateGeminiContent } = require('./geminiClient');
 
 /**
  * BiteSize AI Coach Service
@@ -28,7 +28,12 @@ const generateCoachResponse = async (userId, userMessage) => {
     'SELECT store_name, total_amount, receipt_date FROM receipts WHERE user_id = ? ORDER BY receipt_date DESC LIMIT 5',
     [userId]
   );
-  const totalSpend = receipts.reduce((acc, r) => acc + r.total_amount, 0);
+  const monthKey = new Date().toISOString().slice(0, 7);
+  const spendRow = await get(
+    `SELECT COALESCE(SUM(total_amount), 0) AS total FROM receipts WHERE user_id = ? AND strftime('%Y-%m', receipt_date) = ?`,
+    [userId, monthKey]
+  );
+  const totalSpend = Number(spendRow?.total || 0);
 
   // Fetch budget
   const currentMonth = new Date().toISOString().slice(0, 7);
@@ -57,14 +62,18 @@ const generateCoachResponse = async (userId, userMessage) => {
 
   const pantryListStr = pantryItems.map(p => `${p.name} (${p.quantity} ${p.unit}, exp in ${p.days_remaining}d)`).join(', ');
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const contextSummary = {
+    todayCalories: Math.round(todayCalories),
+    todayProtein: Math.round(todayProtein),
+    budgetRemaining: Math.round(remainingBudget),
+    pantryCount: pantryItems.length
+  };
+  const setupReply = `AI Coach is not configured yet. Add GEMINI_API_KEY to the server environment to enable personalized coaching. Your saved records show ${Math.round(todayCalories)} kcal and ${Math.round(todayProtein)}g protein logged today, with ₹${remainingBudget.toFixed(0)} remaining in this month's grocery budget.`;
+  if (!process.env.GEMINI_API_KEY) {
+    return { reply: setupReply, contextSummary, providerUnavailable: true };
+  }
 
-  if (apiKey) {
-    try {
-      const { GoogleGenerativeAI } = require('@google/generative-ai');
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
+  try {
       const systemPrompt = `You are the BiteSize AI Coach, an intelligent, encouraging, non-judgmental nutrition and grocery intelligence assistant.
 User Profile:
 - Name: ${profile.display_name}
@@ -87,23 +96,21 @@ Important Behavioral Guidelines:
 4. Respect food allergies strictly (User allergies: ${allergies.join(', ') || 'None'}).
 5. Keep advice practical, supportive, and cost-effective (focus on Indian market staples like dal, paneer, sprouts, oats, seasonal veggies).`;
 
-      const result = await model.generateContent(`${systemPrompt}\n\nUser Question: ${userMessage}`);
-      const response = await result.response;
+      const reply = await generateGeminiContent({ prompt: `${systemPrompt}\n\nUser Question: ${userMessage}` });
       return {
-        reply: response.text().trim(),
-        contextSummary: {
-          todayCalories: Math.round(todayCalories),
-          todayProtein: Math.round(todayProtein),
-          budgetRemaining: Math.round(remainingBudget),
-          pantryCount: pantryItems.length
-        }
+        reply,
+        contextSummary
       };
-    } catch (e) {
-      console.warn("Gemini AI Coach error, using intelligent contextual coach:", e.message);
-    }
+  } catch (e) {
+    console.warn('Gemini AI Coach request failed:', e.message);
+    return {
+      reply: 'AI Coach could not reach the configured AI service. Your saved data is unchanged; please try again later.',
+      contextSummary,
+      providerUnavailable: true
+    };
   }
 
-  // Intelligent Contextual Coach Logic
+  // Legacy canned coaching responses below are intentionally unreachable.
   const q = userMessage.toLowerCase();
   let reply = "";
 

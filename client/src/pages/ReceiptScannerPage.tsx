@@ -99,7 +99,7 @@ export const ReceiptScannerPage: React.FC<ReceiptScannerProps> = ({ onNavigate }
 
   const calculateTotal = () => {
     const sum = editableItems.reduce((acc, item) => acc + (Number(item.price) || 0), 0);
-    return Math.max(0, +(sum - Number(editableDiscount)).toFixed(2));
+    return Math.max(0, +(sum - Number(editableDiscount) + Number(editableTax)).toFixed(2));
   };
 
   const handleItemChange = (index: number, field: string, val: any) => {
@@ -113,6 +113,10 @@ export const ReceiptScannerPage: React.FC<ReceiptScannerProps> = ({ onNavigate }
   };
 
   const handleConfirmReceipt = async () => {
+    if (!editableDate) {
+      setError('Confirm the receipt date before saving.');
+      return;
+    }
     const totalAmount = calculateTotal();
 
     try {
@@ -130,7 +134,7 @@ export const ReceiptScannerPage: React.FC<ReceiptScannerProps> = ({ onNavigate }
 
       const res = await receiptApi.confirmReceipt(payload);
       if (res.success) {
-        setSuccessMessage('Receipt verified and synced to your pantry & budget!');
+        setSuccessMessage('Receipt saved. Pantry and budget records were updated.');
         setParsedData(null);
         setSelectedFile(null);
         fetchReceipts();
@@ -250,6 +254,7 @@ export const ReceiptScannerPage: React.FC<ReceiptScannerProps> = ({ onNavigate }
               <Calendar className="w-4 h-4 text-[#5B6B7A]" />
               <input
                 type="date"
+                required
                 value={editableDate}
                 onChange={e => setEditableDate(e.target.value)}
                 className="px-3 py-1.5 rounded-xl border border-[#E8E6E1] dark:border-slate-700 bg-[#FAF8F4] dark:bg-slate-900 text-[#2E2E2E] dark:text-white"
@@ -369,7 +374,7 @@ export const ReceiptScannerPage: React.FC<ReceiptScannerProps> = ({ onNavigate }
               className="px-7 py-3 rounded-xl font-bold text-xs bg-[#C75A3B] text-white hover:bg-[#b0482b] shadow-md shadow-[#C75A3B]/20 flex items-center space-x-2"
             >
               <CheckCircle2 className="w-4 h-4" />
-              <span>Save Receipt & Earn Bite Currency</span>
+              <span>Save Receipt & Update Rewards</span>
             </button>
           </div>
 

@@ -48,12 +48,10 @@ const getRewardsStatus = async (req, res) => {
         [req.user.id, currentMonth]
       );
       const totalSpend = receipts.reduce((acc, r) => acc + r.total_amount, 0);
-      const calculatedReward = +(totalSpend * 0.075).toFixed(2);
-
       const ins = await run(
         `INSERT INTO bite_currency_rewards (user_id, month_year, eligible_grocery_spend, reward_percentage, currency_amount, status)
-         VALUES (?, ?, ?, 7.5, ?, 'in_progress')`,
-        [req.user.id, currentMonth, totalSpend, calculatedReward]
+         VALUES (?, ?, ?, 7.5, 0, 'in_progress')`,
+        [req.user.id, currentMonth, totalSpend]
       );
       currentReward = await get('SELECT * FROM bite_currency_rewards WHERE id = ?', [ins.id]);
     }
@@ -73,6 +71,13 @@ const getRewardsStatus = async (req, res) => {
     // Calculate goals achieved ratio
     const achievedCount = goals.filter(g => g.is_achieved || (g.current_value >= g.target_value)).length;
     const isEligibleForRedemption = goals.length > 0 && achievedCount >= Math.ceil(goals.length / 2);
+    const eligibleSpend = Number(currentReward?.eligible_grocery_spend || 0);
+    const earnedCurrency = isEligibleForRedemption ? +(eligibleSpend * 0.075).toFixed(2) : 0;
+    await run(
+      `UPDATE bite_currency_rewards SET currency_amount = ?, status = ? WHERE id = ?`,
+      [earnedCurrency, isEligibleForRedemption ? 'eligible' : 'in_progress', currentReward.id]
+    );
+    currentReward = await get('SELECT * FROM bite_currency_rewards WHERE id = ?', [currentReward.id]);
 
     res.json({
       success: true,
@@ -87,8 +92,8 @@ const getRewardsStatus = async (req, res) => {
       },
       partnerProgram: {
         partnerName: 'First Club',
-        status: 'Pilot Sandbox Active',
-        disclaimer: 'Bite Currency is calculated as 7.5% of eligible grocery spend upon meeting monthly wellness goals. First Club redemptions are in sponsored pilot mode.'
+        status: 'Demo only; no First Club integration',
+        disclaimer: 'Rewards are illustrative. The 7.5% amount is shown only after the configured monthly goals are met. Voucher codes are previews and cannot be redeemed with First Club.'
       },
       catalog: FIRST_CLUB_CATALOG,
       pastRewards
@@ -111,6 +116,16 @@ const redeemVoucher = async (req, res) => {
       [req.user.id, currentMonth]
     );
 
+    const goals = await all(
+      'SELECT target_value, current_value, is_achieved FROM monthly_goals WHERE user_id = ? AND month_year = ?',
+      [req.user.id, currentMonth]
+    );
+    const achievedGoals = goals.filter(goal => goal.is_achieved || goal.current_value >= goal.target_value).length;
+    const eligible = goals.length > 0 && achievedGoals >= Math.ceil(goals.length / 2);
+    if (!eligible) {
+      return res.status(400).json({ success: false, message: 'Meet at least half of this month’s goals before previewing a reward code.' });
+    }
+
     if (!reward || reward.currency_amount < voucher.requiredCurrency) {
       return res.status(400).json({
         success: false,
@@ -118,21 +133,16 @@ const redeemVoucher = async (req, res) => {
       });
     }
 
-    const code = `FIRSTCLUB-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Date.now().toString().slice(-4)}`;
-
-    // Deduct currency amount
-    const remaining = +(reward.currency_amount - voucher.requiredCurrency).toFixed(2);
-    await run(
-      `UPDATE bite_currency_rewards SET currency_amount = ?, status = 'redeemed', redemption_voucher_code = ?, redeemed_at = CURRENT_TIMESTAMP WHERE id = ?`,
-      [remaining, code, reward.id]
-    );
+    const code = `DEMO-PREVIEW-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    const remaining = reward.currency_amount;
 
     res.json({
       success: true,
-      message: `Voucher redeemed! Code: ${code}`,
+      message: `Demo preview only. This code is not redeemable with First Club.`,
       voucherCode: code,
       voucher,
-      remainingCurrency: remaining
+      remainingCurrency: remaining,
+      isSimulated: true
     });
   } catch (error) {
     console.error('redeemVoucher error:', error);

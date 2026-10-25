@@ -2,9 +2,16 @@ const crypto = require('crypto');
 const Razorpay = require('razorpay');
 const { run, get } = require('../config/database');
 
-const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || 'rzp_test_BiteSizeSandboxKey101';
-const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || 'bitesize_sandbox_secret_key_2026';
-const IS_SANDBOX = !process.env.RAZORPAY_KEY_ID;
+const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID;
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
+const IS_SANDBOX = !(RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET);
+
+const configuredPrice = (name, fallback) => {
+  const configured = process.env[name];
+  if (!configured || !configured.trim()) return fallback;
+  const value = Number(configured);
+  return Number.isFinite(value) && value >= 0 ? value : fallback;
+};
 
 let razorpayInstance = null;
 if (!IS_SANDBOX) {
@@ -35,7 +42,7 @@ const PLAN_CONFIG = {
   big_bite: {
     id: 'big_bite',
     name: 'Big Bite',
-    price: 199,
+    price: configuredPrice('BIG_BITE_PRICE_INR', 199),
     interval: 'monthly',
     receiptScanLimit: 999999, // Unlimited fair-use
     mealScanLimit: 999999,
@@ -47,7 +54,7 @@ const PLAN_CONFIG = {
   shared_bite: {
     id: 'shared_bite',
     name: 'Shared Bite (Family)',
-    price: 399,
+    price: configuredPrice('SHARED_BITE_PRICE_INR', 399),
     interval: 'monthly',
     receiptScanLimit: 999999,
     mealScanLimit: 999999,
@@ -66,9 +73,15 @@ const createOrder = async ({ userId, planId }) => {
   const plan = PLAN_CONFIG[planId];
   if (!plan) throw new Error(`Invalid plan: ${planId}`);
   if (plan.price === 0) throw new Error("Free plan does not require checkout order");
+  if (IS_SANDBOX && process.env.NODE_ENV === 'production' && process.env.ENABLE_SANDBOX_PAYMENTS !== 'true') {
+    const error = new Error('Paid checkout is disabled until Razorpay credentials are configured.');
+    error.statusCode = 503;
+    throw error;
+  }
 
   const amountPaise = plan.price * 100;
   const receiptId = `rcpt_${userId}_${Date.now()}`;
+  let orderData;
 
   if (razorpayInstance && !IS_SANDBOX) {
     const options = {
@@ -78,44 +91,86 @@ const createOrder = async ({ userId, planId }) => {
       notes: { userId, planId }
     };
     const order = await razorpayInstance.orders.create(options);
-    return {
+    orderData = {
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
       keyId: RAZORPAY_KEY_ID,
       isSandbox: false,
-      plan
+      plan,
+      userId,
+      planId
+    };
+  } else {
+    const simulatedOrderId = `order_test_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+    orderData = {
+      orderId: simulatedOrderId,
+      amount: amountPaise,
+      currency: 'INR',
+      keyId: null,
+      isSandbox: true,
+      sandboxNotice: 'TEST MODE: no payment was processed and no money was charged.',
+      plan,
+      userId,
+      planId
     };
   }
 
-  // Realistic Sandbox Mode Order
-  const simulatedOrderId = `order_test_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-  return {
-    orderId: simulatedOrderId,
-    amount: amountPaise,
-    currency: "INR",
-    keyId: RAZORPAY_KEY_ID,
-    isSandbox: true,
-    sandboxNotice: "Operating in BiteSize Verified Test Sandbox. No real money will be charged.",
-    plan
-  };
+  await run(
+    `INSERT INTO payment_transactions (user_id, payment_id, order_id, amount_inr, status, plan_id, is_sandbox)
+     VALUES (?, ?, ?, ?, 'pending', ?, ?)`,
+    [userId, `pending_${orderData.orderId}`, orderData.orderId, plan.price, planId, orderData.isSandbox ? 1 : 0]
+  );
+  return orderData;
 };
 
 /**
  * Verifies Razorpay payment signature & activates subscription
  */
-const verifyPaymentAndActivate = async ({ userId, razorpayPaymentId, razorpayOrderId, razorpaySignature, planId, isSandbox = false }) => {
+const verifyPaymentAndActivate = async ({ userId, razorpayPaymentId, razorpayOrderId, razorpaySignature, planId }) => {
   const plan = PLAN_CONFIG[planId];
   if (!plan) throw new Error("Invalid plan specified");
 
-  if (!isSandbox && razorpayInstance) {
+  const pendingOrder = await get(
+    `SELECT * FROM payment_transactions WHERE user_id = ? AND order_id = ? AND plan_id = ? AND status = 'pending'`,
+    [userId, razorpayOrderId, planId]
+  );
+  if (!pendingOrder || Number(pendingOrder.amount_inr) !== Number(plan.price)) {
+    throw new Error('No matching pending checkout order was found for this account.');
+  }
+
+  const isSandbox = Boolean(pendingOrder.is_sandbox);
+  if (isSandbox !== IS_SANDBOX) throw new Error('Checkout mode does not match the server payment configuration.');
+
+  if (isSandbox) {
+    if (process.env.NODE_ENV === 'production' && process.env.ENABLE_SANDBOX_PAYMENTS !== 'true') {
+      throw new Error('Sandbox payments are disabled in production. Configure Razorpay credentials to accept payments.');
+    }
+    if (!String(razorpayOrderId).startsWith('order_test_') || !String(razorpayPaymentId || '').startsWith('pay_sandbox_')) {
+      throw new Error('Invalid sandbox checkout identifiers.');
+    }
+  } else {
+    if (!razorpayInstance || !razorpayPaymentId || !razorpaySignature) throw new Error('Missing Razorpay payment verification details.');
     const generatedSignature = crypto
       .createHmac('sha256', RAZORPAY_KEY_SECRET)
       .update(`${razorpayOrderId}|${razorpayPaymentId}`)
       .digest('hex');
 
-    if (generatedSignature !== razorpaySignature) {
+    const expected = Buffer.from(generatedSignature, 'hex');
+    const provided = Buffer.from(String(razorpaySignature), 'hex');
+    if (expected.length !== provided.length || !crypto.timingSafeEqual(expected, provided)) {
       throw new Error("Invalid payment signature verification failed!");
+    }
+
+    const [order, payment] = await Promise.all([
+      razorpayInstance.orders.fetch(razorpayOrderId),
+      razorpayInstance.payments.fetch(razorpayPaymentId)
+    ]);
+    if (order.amount !== plan.price * 100 || order.currency !== 'INR' || String(order.notes?.userId) !== String(userId) || order.notes?.planId !== planId) {
+      throw new Error('The Razorpay order does not match this account or subscription plan.');
+    }
+    if (payment.order_id !== razorpayOrderId || payment.status !== 'captured') {
+      throw new Error('Razorpay has not confirmed a captured payment for this order.');
     }
   }
 
@@ -124,12 +179,12 @@ const verifyPaymentAndActivate = async ({ userId, razorpayPaymentId, razorpayOrd
   nextBilling.setDate(nextBilling.getDate() + 30);
   const nextBillingStr = nextBilling.toISOString().slice(0, 10);
 
-  // Record transaction in database
-  await run(
-    `INSERT INTO payment_transactions (user_id, payment_id, order_id, amount_inr, status, plan_id, is_sandbox)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [userId, razorpayPaymentId || `pay_sim_${Date.now()}`, razorpayOrderId, plan.price, 'success', planId, isSandbox ? 1 : 0]
+  const finalized = await run(
+    `UPDATE payment_transactions SET payment_id = ?, status = 'success'
+     WHERE id = ? AND user_id = ? AND status = 'pending'`,
+    [razorpayPaymentId, pendingOrder.id, userId]
   );
+  if (!finalized.changes) throw new Error('This checkout order has already been used.');
 
   // Update User Plan
   await run(`UPDATE users SET plan = ? WHERE id = ?`, [planId, userId]);
@@ -154,7 +209,8 @@ const verifyPaymentAndActivate = async ({ userId, razorpayPaymentId, razorpayOrd
     planId,
     planName: plan.name,
     nextBillingDate: nextBillingStr,
-    isSandbox
+    isSandbox,
+    paymentNotice: isSandbox ? 'TEST MODE: no payment was processed.' : 'Payment verified with Razorpay.'
   };
 };
 
@@ -207,6 +263,7 @@ const checkPlanLimit = async (userId, actionType) => {
 
 module.exports = {
   PLAN_CONFIG,
+  IS_SANDBOX,
   createOrder,
   verifyPaymentAndActivate,
   checkPlanLimit

@@ -123,6 +123,7 @@ export const shoppingApi = {
 
 // Subscriptions & Razorpay
 export const subApi = {
+  getPlans: () => apiRequest('/subscriptions/plans'),
   getStatus: () => apiRequest('/subscriptions/status'),
   createCheckout: (planId: string) => apiRequest('/subscriptions/create-order', { method: 'POST', body: JSON.stringify({ planId }) }),
   verifyPayment: (body: any) => apiRequest('/subscriptions/verify-payment', { method: 'POST', body: JSON.stringify(body) }),

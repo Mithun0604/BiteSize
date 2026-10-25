@@ -1,5 +1,9 @@
 const { run, get, all } = require('../config/database');
-const { PLAN_CONFIG, createOrder, verifyPaymentAndActivate } = require('../services/paymentService');
+const { PLAN_CONFIG, IS_SANDBOX, createOrder, verifyPaymentAndActivate } = require('../services/paymentService');
+
+const getPlans = async (req, res) => {
+  res.json({ success: true, plans: Object.values(PLAN_CONFIG) });
+};
 
 const getStatus = async (req, res) => {
   try {
@@ -39,6 +43,7 @@ const getStatus = async (req, res) => {
         mealScanLimit: plan.mealScanLimit
       },
       plans: Object.values(PLAN_CONFIG),
+      paymentMode: IS_SANDBOX ? 'sandbox' : 'live',
       recentTransactions: transactions
     });
   } catch (error) {
@@ -58,21 +63,20 @@ const createCheckout = async (req, res) => {
     res.json({ success: true, ...orderData });
   } catch (error) {
     console.error('createCheckout error:', error);
-    res.status(500).json({ success: false, message: error.message || 'Failed to initiate checkout.' });
+    res.status(error.statusCode || 500).json({ success: false, message: error.message || 'Failed to initiate checkout.' });
   }
 };
 
 const verifyPayment = async (req, res) => {
   try {
-    const { razorpayPaymentId, razorpayOrderId, razorpaySignature, planId, isSandbox } = req.body;
+    const { razorpayPaymentId, razorpayOrderId, razorpaySignature, planId } = req.body;
 
     const result = await verifyPaymentAndActivate({
       userId: req.user.id,
       razorpayPaymentId,
       razorpayOrderId,
       razorpaySignature,
-      planId,
-      isSandbox: Boolean(isSandbox)
+      planId
     });
 
     res.json({
@@ -105,6 +109,7 @@ const cancelSubscription = async (req, res) => {
 };
 
 module.exports = {
+  getPlans,
   getStatus,
   createCheckout,
   verifyPayment,
