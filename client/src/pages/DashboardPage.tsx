@@ -103,11 +103,32 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
             <span>Scan Meal</span>
           </button>
           <button
+            onClick={() => onNavigate('diary')}
+            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-[#2E2E2E] dark:text-white border border-[#E8E6E1] dark:border-slate-700 hover:border-[#C75A3B] transition-colors"
+          >
+            <Calendar className="w-4 h-4 text-[#C75A3B]" />
+            <span>Food Diary</span>
+          </button>
+          <button
+            onClick={() => onNavigate('meal-planner')}
+            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-[#2E2E2E] dark:text-white border border-[#E8E6E1] dark:border-slate-700 hover:border-[#C75A3B] transition-colors"
+          >
+            <Sparkles className="w-4 h-4 text-[#D4A85A]" />
+            <span>Meal Planner</span>
+          </button>
+          <button
             onClick={() => onNavigate('scan-receipt')}
             className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-[#2E2E2E] dark:text-white border border-[#E8E6E1] dark:border-slate-700 hover:border-[#C75A3B] transition-colors"
           >
             <Receipt className="w-4 h-4 text-[#5B6B7A]" />
             <span>Upload Receipt</span>
+          </button>
+          <button
+            onClick={() => onNavigate('progress')}
+            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-[#2E2E2E] dark:text-white border border-[#E8E6E1] dark:border-slate-700 hover:border-[#C75A3B] transition-colors"
+          >
+            <TrendingUp className="w-4 h-4 text-[#2E7D6B]" />
+            <span>Progress</span>
           </button>
           <button
             onClick={() => onNavigate('coach')}

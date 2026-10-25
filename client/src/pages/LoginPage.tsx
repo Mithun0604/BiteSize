@@ -114,10 +114,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
               </label>
               <button
                 type="button"
-                onClick={() => alert("Password reset link sent to registered email.")}
+                onClick={() => onNavigate('forgot-password')}
                 className="text-[11px] text-[#C75A3B] hover:underline"
               >
-                Forgot?
+                Forgot Password?
               </button>
             </div>
             <div className="relative">

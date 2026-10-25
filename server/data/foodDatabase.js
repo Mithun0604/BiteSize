@@ -226,7 +226,91 @@ const foodDatabase = [
     commonCookingVariations: ["Chilled", "Smoothie base"]
   },
 
-  // Poultry, Eggs & Fish
+  // Poultry, Eggs, Meat & Fish (Verified USDA FoodData Central & ICMR-NIN IFCT)
+  {
+    id: "chicken_breast_grilled",
+    name: "Skinless Chicken Breast (Grilled / Pan-Seared)",
+    category: "Poultry & Meat",
+    standardServingGrams: 150,
+    servingUnit: "1 medium breast fillet (150g)",
+    per100g: { calories: 165, protein: 31.0, carbs: 0, fat: 3.6, fiber: 0, sugar: 0, sodium: 74 },
+    micronutrients: { iron_mg: 1.0, calcium_mg: 15, potassium_mg: 256 },
+    tags: ["lean-protein", "high-protein", "low-carb", "non-veg", "poultry", "keto-friendly"],
+    approxCostPerKg: 320,
+    commonCookingVariations: ["Pan grilled with herbs", "Boiled/Shredded", "Tandoori style"]
+  },
+  {
+    id: "chicken_breast_raw",
+    name: "Raw Skinless Chicken Breast (Boneless Fillet)",
+    category: "Poultry & Meat",
+    standardServingGrams: 150,
+    servingUnit: "1 raw fillet (150g)",
+    per100g: { calories: 120, protein: 22.5, carbs: 0, fat: 2.6, fiber: 0, sugar: 0, sodium: 65 },
+    micronutrients: { iron_mg: 0.9, calcium_mg: 11, potassium_mg: 330 },
+    tags: ["raw", "lean-protein", "high-protein", "low-carb", "non-veg", "poultry"],
+    approxCostPerKg: 280,
+    commonCookingVariations: ["Raw for cooking"]
+  },
+  {
+    id: "chicken_breast_boiled",
+    name: "Skinless Chicken Breast (Boiled / Poached)",
+    category: "Poultry & Meat",
+    standardServingGrams: 150,
+    servingUnit: "1 medium breast (150g)",
+    per100g: { calories: 158, protein: 32.1, carbs: 0, fat: 3.2, fiber: 0, sugar: 0, sodium: 68 },
+    micronutrients: { iron_mg: 1.1, calcium_mg: 14, potassium_mg: 250 },
+    tags: ["lean-protein", "high-protein", "zero-oil", "non-veg", "poultry"],
+    approxCostPerKg: 320,
+    commonCookingVariations: ["Shredded in salad", "In clear broth"]
+  },
+  {
+    id: "chicken_breast_baked",
+    name: "Oven Baked Chicken Breast (Skinless)",
+    category: "Poultry & Meat",
+    standardServingGrams: 150,
+    servingUnit: "1 breast (150g)",
+    per100g: { calories: 165, protein: 31.0, carbs: 0, fat: 3.6, fiber: 0, sugar: 0, sodium: 70 },
+    micronutrients: { iron_mg: 1.0, calcium_mg: 15, potassium_mg: 255 },
+    tags: ["lean-protein", "high-protein", "baked", "non-veg", "poultry"],
+    approxCostPerKg: 320,
+    commonCookingVariations: ["Oven roasted with rosemary and olive oil"]
+  },
+  {
+    id: "chicken_breast_fried",
+    name: "Pan-Fried / Crispy Chicken Breast",
+    category: "Poultry & Meat",
+    standardServingGrams: 150,
+    servingUnit: "1 crispy cutlet (150g)",
+    per100g: { calories: 242, protein: 26.8, carbs: 8.5, fat: 11.2, fiber: 0.6, sugar: 0.2, sodium: 340 },
+    micronutrients: { iron_mg: 1.2, calcium_mg: 18, potassium_mg: 260 },
+    tags: ["high-protein", "fried", "non-veg", "poultry"],
+    approxCostPerKg: 340,
+    commonCookingVariations: ["Breaded and pan-fried", "Deep fried"]
+  },
+  {
+    id: "chicken_breast_skin_on",
+    name: "Roast Chicken Breast (with Skin)",
+    category: "Poultry & Meat",
+    standardServingGrams: 160,
+    servingUnit: "1 piece with skin (160g)",
+    per100g: { calories: 197, protein: 29.8, carbs: 0, fat: 7.8, fiber: 0, sugar: 0, sodium: 71 },
+    micronutrients: { iron_mg: 1.1, calcium_mg: 16, potassium_mg: 248 },
+    tags: ["high-protein", "keto-friendly", "non-veg", "poultry"],
+    approxCostPerKg: 300,
+    commonCookingVariations: ["Crispy roasted with skin"]
+  },
+  {
+    id: "chicken_tikka_tandoori",
+    name: "Tandoori Chicken Tikka (Boneless Breast Cubes)",
+    category: "Poultry & Meat",
+    standardServingGrams: 160,
+    servingUnit: "6 tikka pieces (160g)",
+    per100g: { calories: 160, protein: 26.5, carbs: 3.5, fat: 4.5, fiber: 0.5, sugar: 1.0, sodium: 280 },
+    micronutrients: { iron_mg: 1.3, calcium_mg: 35, potassium_mg: 270 },
+    tags: ["high-protein", "tandoori", "non-veg", "lean-protein"],
+    approxCostPerKg: 360,
+    commonCookingVariations: ["Clay oven roasted with yogurt marinade"]
+  },
   {
     id: "egg_boiled_whole",
     name: "Whole Boiled Egg (Large)",
@@ -235,9 +319,9 @@ const foodDatabase = [
     servingUnit: "1 large egg (50g)",
     per100g: { calories: 155, protein: 12.6, carbs: 1.1, fat: 10.6, fiber: 0, sugar: 0.4, sodium: 124 },
     micronutrients: { iron_mg: 1.8, calcium_mg: 50, potassium_mg: 126 },
-    tags: ["high-protein", "keto-friendly", "non-veg"],
+    tags: ["high-protein", "keto-friendly", "non-veg", "egg"],
     approxCostPerKg: 140, // ~7-8 per egg
-    commonCookingVariations: ["Hard boiled", "Poached", "Egg Bhurji"]
+    commonCookingVariations: ["Hard boiled", "Soft boiled", "Egg Bhurji"]
   },
   {
     id: "egg_white_boiled",
@@ -247,21 +331,21 @@ const foodDatabase = [
     servingUnit: "1 egg white (33g)",
     per100g: { calories: 52, protein: 10.9, carbs: 0.7, fat: 0.2, fiber: 0, sugar: 0.7, sodium: 166 },
     micronutrients: { iron_mg: 0.1, calcium_mg: 7, potassium_mg: 163 },
-    tags: ["lean-protein", "fat-free", "low-calorie", "non-veg"],
+    tags: ["lean-protein", "fat-free", "low-calorie", "non-veg", "egg"],
     approxCostPerKg: 140,
     commonCookingVariations: ["Hard boiled"]
   },
   {
-    id: "chicken_breast_grilled",
-    name: "Skinless Chicken Breast (Grilled/Boiled)",
-    category: "Poultry & Meat",
-    standardServingGrams: 150,
-    servingUnit: "1 piece / breast (150g)",
-    per100g: { calories: 165, protein: 31.0, carbs: 0, fat: 3.6, fiber: 0, sugar: 0, sodium: 74 },
-    micronutrients: { iron_mg: 1.0, calcium_mg: 15, potassium_mg: 256 },
-    tags: ["lean-protein", "high-protein", "low-carb", "non-veg"],
-    approxCostPerKg: 320,
-    commonCookingVariations: ["Pan grilled with herbs", "Boiled/Shredded", "Tandoori style"]
+    id: "egg_scramble_bhurji",
+    name: "Egg Bhurji / Scrambled Eggs (with onion & tomato)",
+    category: "Dairy & Eggs",
+    standardServingGrams: 100,
+    servingUnit: "1 serving (2 eggs, 100g)",
+    per100g: { calories: 168, protein: 11.5, carbs: 3.2, fat: 12.0, fiber: 0.5, sugar: 1.2, sodium: 220 },
+    micronutrients: { iron_mg: 1.7, calcium_mg: 48, potassium_mg: 160 },
+    tags: ["high-protein", "keto-friendly", "non-veg", "egg"],
+    approxCostPerKg: 160,
+    commonCookingVariations: ["Sautéed with green chilies and onions"]
   },
   {
     id: "chicken_curry_homestyle",
@@ -276,6 +360,18 @@ const foodDatabase = [
     commonCookingVariations: ["Homestyle onion tomato curry", "Spicy Chettinad"]
   },
   {
+    id: "fish_grilled_salmon",
+    name: "Grilled Salmon / Rawas Fillet",
+    category: "Fish & Seafood",
+    standardServingGrams: 150,
+    servingUnit: "1 fillet (150g)",
+    per100g: { calories: 206, protein: 22.0, carbs: 0, fat: 12.3, fiber: 0, sugar: 0, sodium: 60 },
+    micronutrients: { iron_mg: 0.8, calcium_mg: 12, potassium_mg: 380 },
+    tags: ["omega-3", "high-protein", "heart-healthy", "non-veg", "keto-friendly"],
+    approxCostPerKg: 900,
+    commonCookingVariations: ["Pan grilled with lemon pepper", "Baked"]
+  },
+  {
     id: "fish_rohu_curry",
     name: "Rohu / Katla Fish Curry (Bengali / Coastal style)",
     category: "Fish & Seafood",
@@ -286,6 +382,18 @@ const foodDatabase = [
     tags: ["omega-3", "high-protein", "non-veg"],
     approxCostPerKg: 260,
     commonCookingVariations: ["Mustard gravy", "Tomato onion light broth"]
+  },
+  {
+    id: "mutton_curry_rogan_josh",
+    name: "Mutton / Goat Curry (Slow Cooked)",
+    category: "Poultry & Meat",
+    standardServingGrams: 180,
+    servingUnit: "1 medium bowl (180g)",
+    per100g: { calories: 220, protein: 17.0, carbs: 2.8, fat: 15.5, fiber: 0.6, sugar: 1.0, sodium: 310 },
+    micronutrients: { iron_mg: 2.4, calcium_mg: 20, potassium_mg: 260 },
+    tags: ["high-iron", "high-protein", "non-veg"],
+    approxCostPerKg: 750,
+    commonCookingVariations: ["Pressure cooked homestyle gravy"]
   },
 
   // Vegetables & Sabzis

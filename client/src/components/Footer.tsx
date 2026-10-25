@@ -36,6 +36,16 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 </button>
               </li>
               <li>
+                <button onClick={() => onNavigate('diary')} className="hover:text-white transition-colors">
+                  Daily Food Diary
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onNavigate('meal-planner')} className="hover:text-white transition-colors">
+                  Weekly Meal Planner
+                </button>
+              </li>
+              <li>
                 <button onClick={() => onNavigate('scan-receipt')} className="hover:text-white transition-colors">
                   Grocery Receipt OCR
                 </button>
@@ -58,23 +68,18 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </ul>
           </div>
 
-          {/* Rewards & Business */}
+          {/* Rewards & Plans */}
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wider text-[#D4A85A] mb-3">Rewards & Plans</h4>
             <ul className="space-y-2 text-xs text-stone-300">
               <li>
+                <button onClick={() => onNavigate('pricing')} className="hover:text-white transition-colors">
+                  Plans & Pricing Comparison
+                </button>
+              </li>
+              <li>
                 <button onClick={() => onNavigate('rewards')} className="hover:text-white transition-colors">
                   Bite Currency (7.5% Reward)
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigate('subscriptions')} className="hover:text-white transition-colors">
-                  Small Bite (Free Plan)
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigate('subscriptions')} className="hover:text-white transition-colors">
-                  Big Bite (Individual Pro)
                 </button>
               </li>
               <li>
@@ -83,8 +88,13 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('rewards')} className="hover:text-white transition-colors">
-                  First Club Partner Program
+                <button onClick={() => onNavigate('about')} className="hover:text-white transition-colors">
+                  About BiteSize
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onNavigate('contact')} className="hover:text-white transition-colors">
+                  Contact & Support
                 </button>
               </li>
             </ul>
@@ -96,12 +106,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <p className="text-[11px] text-stone-400 leading-relaxed mb-3">
               Nutrition values are confidence-calibrated estimates calculated via ICMR-NIN IFCT & USDA databases. BiteSize does not substitute clinical advice or promote restrictive eating.
             </p>
-            <div className="flex space-x-3 text-xs text-stone-400">
-              <button onClick={() => onNavigate('help')} className="hover:text-white transition-colors">
+            <div className="flex flex-wrap gap-2 text-xs text-stone-400">
+              <button onClick={() => onNavigate('privacy')} className="hover:text-white transition-colors">
                 Privacy Policy
               </button>
               <span>•</span>
-              <button onClick={() => onNavigate('help')} className="hover:text-white transition-colors">
+              <button onClick={() => onNavigate('terms')} className="hover:text-white transition-colors">
                 Terms of Service
               </button>
               <span>•</span>
@@ -114,7 +124,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
         <div className="pt-6 border-t border-stone-800 flex flex-col sm:flex-row items-center justify-between text-[11px] text-stone-400">
           <p>© 2026 BiteSize Intelligence. All rights reserved. Made for Indian kitchens and mindful eaters.</p>
-          <p className="mt-2 sm:mt-0">“Make every grocery choice count.”</p>
+          <p className="mt-2 sm:mt-0">“Small choices. Big impact.”</p>
         </div>
       </div>
     </footer>

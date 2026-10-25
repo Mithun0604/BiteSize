@@ -189,6 +189,38 @@ const getMealsByDate = async (req, res) => {
 };
 
 /**
+ * Get all logged meals for a user (history)
+ */
+const getAllMeals = async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit) || 50, 100);
+    const search = req.query.search ? `%${req.query.search.toLowerCase()}%` : null;
+
+    let query = 'SELECT * FROM meals WHERE user_id = ?';
+    const params = [req.user.id];
+
+    if (search) {
+      query += ' AND (LOWER(meal_name) LIKE ? OR LOWER(notes) LIKE ?)';
+      params.push(search, search);
+    }
+
+    query += ' ORDER BY logged_date DESC, id DESC LIMIT ?';
+    params.push(limit);
+
+    const meals = await all(query, params);
+
+    res.json({
+      success: true,
+      count: meals.length,
+      meals
+    });
+  } catch (error) {
+    console.error('getAllMeals error:', error);
+    res.status(500).json({ success: false, message: 'Failed to retrieve meal history.' });
+  }
+};
+
+/**
  * Delete a meal entry
  */
 const deleteMeal = async (req, res) => {
@@ -206,5 +238,6 @@ module.exports = {
   scanMeal,
   confirmAndSaveMeal,
   getMealsByDate,
+  getAllMeals,
   deleteMeal
 };

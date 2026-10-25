@@ -71,6 +71,8 @@ app.get('/api/health', (req, res) => {
 // 1. Auth Routes
 app.post('/api/auth/register', authCtrl.register);
 app.post('/api/auth/login', authCtrl.login);
+app.post('/api/auth/forgot-password', authCtrl.forgotPassword);
+app.post('/api/auth/reset-password', authCtrl.resetPassword);
 app.get('/api/auth/profile', authenticateToken, authCtrl.getProfile);
 app.put('/api/auth/profile', authenticateToken, authCtrl.updateProfile);
 app.delete('/api/auth/account', authenticateToken, authCtrl.deleteAccount);
@@ -79,6 +81,7 @@ app.delete('/api/auth/account', authenticateToken, authCtrl.deleteAccount);
 app.post('/api/meals/scan', authenticateToken, upload.single('image'), mealCtrl.scanMeal);
 app.post('/api/meals/confirm', authenticateToken, mealCtrl.confirmAndSaveMeal);
 app.get('/api/meals', authenticateToken, mealCtrl.getMealsByDate);
+app.get('/api/meals/all', authenticateToken, mealCtrl.getAllMeals);
 app.delete('/api/meals/:id', authenticateToken, mealCtrl.deleteMeal);
 
 // 3. Receipt Scanner & Grocery Routes

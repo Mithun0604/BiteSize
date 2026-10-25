@@ -18,7 +18,15 @@ import {
   Sun,
   Moon,
   ShieldCheck,
-  HelpCircle
+  HelpCircle,
+  Calendar,
+  ChefHat,
+  History,
+  TrendingUp,
+  Target,
+  Info,
+  Mail,
+  Home
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -32,16 +40,17 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-  const navItems = [
+  // Main primary navigation bar items for logged-in users
+  const loggedInNavItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-    { id: 'scan-meal', label: 'Scan Meal', icon: Camera, highlight: true },
+    { id: 'scan-meal', label: 'AI Scanner', icon: Camera, highlight: true },
+    { id: 'diary', label: 'Food Diary', icon: Calendar },
+    { id: 'meal-planner', label: 'Meal Planner', icon: ChefHat },
     { id: 'scan-receipt', label: 'Receipts', icon: Receipt },
     { id: 'coach', label: 'AI Coach', icon: Sparkles },
-    { id: 'what-if', label: 'What If?', icon: ArrowRightLeft },
-    { id: 'pantry', label: 'Pantry & Plate', icon: Refrigerator },
+    { id: 'pantry', label: 'Pantry', icon: Refrigerator },
     { id: 'shopping-list', label: 'Shopping', icon: ShoppingCart },
-    { id: 'rewards', label: 'Rewards', icon: Coins },
-    { id: 'family', label: 'Family', icon: Users, sharedOnly: true }
+    { id: 'pricing', label: 'Pricing', icon: ShieldCheck }
   ];
 
   const handleNavClick = (pageId: string) => {
@@ -92,14 +101,14 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
 
           {/* Desktop Navigation for Logged-In Users */}
           {user ? (
-            <nav className="hidden lg:flex items-center space-x-1">
-              {navItems.map(item => {
+            <nav className="hidden xl:flex items-center space-x-1">
+              {loggedInNavItems.map(item => {
                 const isActive = currentPage === item.id;
                 return (
                   <button
                     key={item.id}
                     onClick={() => handleNavClick(item.id)}
-                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                       isActive
                         ? 'bg-[#C75A3B] text-white shadow-sm'
                         : item.highlight
@@ -107,31 +116,50 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
                         : 'text-[#5B6B7A] dark:text-slate-300 hover:text-[#2E2E2E] dark:hover:text-white hover:bg-[#F8F7F4] dark:hover:bg-slate-800'
                     }`}
                   >
-                    <item.icon className="w-4 h-4" />
+                    <item.icon className="w-3.5 h-3.5" />
                     <span>{item.label}</span>
                   </button>
                 );
               })}
             </nav>
           ) : (
-            <nav className="hidden md:flex items-center space-x-6">
+            /* Desktop Navigation for Visitors */
+            <nav className="hidden lg:flex items-center space-x-6">
               <button
                 onClick={() => handleNavClick('landing')}
-                className={`text-sm font-medium ${currentPage === 'landing' ? 'text-[#C75A3B]' : 'text-[#5B6B7A] hover:text-[#2E2E2E]'}`}
+                className={`text-xs font-bold ${currentPage === 'landing' ? 'text-[#C75A3B]' : 'text-[#5B6B7A] hover:text-[#2E2E2E] dark:hover:text-white'}`}
               >
-                Overview
+                Home
               </button>
               <button
-                onClick={() => handleNavClick('subscriptions')}
-                className="text-sm font-medium text-[#5B6B7A] hover:text-[#2E2E2E]"
+                onClick={() => handleNavClick('scan-meal')}
+                className={`text-xs font-bold ${currentPage === 'scan-meal' ? 'text-[#C75A3B]' : 'text-[#5B6B7A] hover:text-[#2E2E2E] dark:hover:text-white'}`}
               >
-                Plans & Pricing
+                AI Food Scanner
               </button>
               <button
-                onClick={() => handleNavClick('help')}
-                className="text-sm font-medium text-[#5B6B7A] hover:text-[#2E2E2E]"
+                onClick={() => handleNavClick('meal-planner')}
+                className={`text-xs font-bold ${currentPage === 'meal-planner' ? 'text-[#C75A3B]' : 'text-[#5B6B7A] hover:text-[#2E2E2E] dark:hover:text-white'}`}
               >
-                How It Works
+                Meal Planner
+              </button>
+              <button
+                onClick={() => handleNavClick('pricing')}
+                className={`text-xs font-bold ${currentPage === 'pricing' ? 'text-[#C75A3B]' : 'text-[#5B6B7A] hover:text-[#2E2E2E] dark:hover:text-white'}`}
+              >
+                Pricing & Plans
+              </button>
+              <button
+                onClick={() => handleNavClick('about')}
+                className={`text-xs font-bold ${currentPage === 'about' ? 'text-[#C75A3B]' : 'text-[#5B6B7A] hover:text-[#2E2E2E] dark:hover:text-white'}`}
+              >
+                About Us
+              </button>
+              <button
+                onClick={() => handleNavClick('contact')}
+                className={`text-xs font-bold ${currentPage === 'contact' ? 'text-[#C75A3B]' : 'text-[#5B6B7A] hover:text-[#2E2E2E] dark:hover:text-white'}`}
+              >
+                Contact
               </button>
             </nav>
           )}
@@ -168,43 +196,89 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
 
                 {/* Dropdown Menu */}
                 {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white dark:bg-slate-800 shadow-xl border border-[#E8E6E1] dark:border-slate-700 py-2 z-50">
-                    <div className="px-4 py-2 border-b border-[#E8E6E1] dark:border-slate-700">
-                      <p className="text-xs text-[#5B6B7A] dark:text-slate-400">Signed in as</p>
-                      <p className="text-xs font-medium text-[#2E2E2E] dark:text-white truncate">{user.email}</p>
+                  <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-white dark:bg-slate-800 shadow-2xl border border-[#E8E6E1] dark:border-slate-700 py-2 z-50 animate-scale-in">
+                    <div className="px-4 py-2.5 border-b border-[#E8E6E1] dark:border-slate-700">
+                      <p className="text-[10px] text-[#5B6B7A] dark:text-slate-400">Signed in as</p>
+                      <p className="text-xs font-bold text-[#2E2E2E] dark:text-white truncate">{user.email}</p>
                     </div>
 
-                    <button
-                      onClick={() => handleNavClick('profile')}
-                      className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-[#2E2E2E] dark:text-slate-200 hover:bg-[#FAF8F4] dark:hover:bg-slate-700"
-                    >
-                      <User className="w-4 h-4 text-[#5B6B7A]" />
-                      <span>Profile & Health Targets</span>
-                    </button>
+                    <div className="py-1">
+                      <button
+                        onClick={() => handleNavClick('profile')}
+                        className="w-full flex items-center space-x-2.5 px-4 py-2 text-xs font-semibold text-[#2E2E2E] dark:text-slate-200 hover:bg-[#FAF8F4] dark:hover:bg-slate-700"
+                      >
+                        <User className="w-4 h-4 text-[#5B6B7A]" />
+                        <span>Profile & Settings</span>
+                      </button>
 
-                    <button
-                      onClick={() => handleNavClick('subscriptions')}
-                      className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-[#2E2E2E] dark:text-slate-200 hover:bg-[#FAF8F4] dark:hover:bg-slate-700"
-                    >
-                      <ShieldCheck className="w-4 h-4 text-[#C75A3B]" />
-                      <span>Manage Subscription</span>
-                    </button>
+                      <button
+                        onClick={() => handleNavClick('goals')}
+                        className="w-full flex items-center space-x-2.5 px-4 py-2 text-xs font-semibold text-[#2E2E2E] dark:text-slate-200 hover:bg-[#FAF8F4] dark:hover:bg-slate-700"
+                      >
+                        <Target className="w-4 h-4 text-[#C75A3B]" />
+                        <span>Goals & Dietary Preferences</span>
+                      </button>
 
-                    <button
-                      onClick={() => handleNavClick('reports')}
-                      className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-[#2E2E2E] dark:text-slate-200 hover:bg-[#FAF8F4] dark:hover:bg-slate-700"
-                    >
-                      <BarChart3 className="w-4 h-4 text-[#5B6B7A]" />
-                      <span>Nutrition Reports</span>
-                    </button>
+                      <button
+                        onClick={() => handleNavClick('meal-history')}
+                        className="w-full flex items-center space-x-2.5 px-4 py-2 text-xs font-semibold text-[#2E2E2E] dark:text-slate-200 hover:bg-[#FAF8F4] dark:hover:bg-slate-700"
+                      >
+                        <History className="w-4 h-4 text-[#5B6B7A]" />
+                        <span>Meal History Archive</span>
+                      </button>
 
-                    <button
-                      onClick={() => handleNavClick('help')}
-                      className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-[#2E2E2E] dark:text-slate-200 hover:bg-[#FAF8F4] dark:hover:bg-slate-700"
-                    >
-                      <HelpCircle className="w-4 h-4 text-[#5B6B7A]" />
-                      <span>Help & FAQ</span>
-                    </button>
+                      <button
+                        onClick={() => handleNavClick('progress')}
+                        className="w-full flex items-center space-x-2.5 px-4 py-2 text-xs font-semibold text-[#2E2E2E] dark:text-slate-200 hover:bg-[#FAF8F4] dark:hover:bg-slate-700"
+                      >
+                        <TrendingUp className="w-4 h-4 text-[#2E7D6B]" />
+                        <span>Progress & BMI Tracking</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleNavClick('pricing')}
+                        className="w-full flex items-center space-x-2.5 px-4 py-2 text-xs font-semibold text-[#2E2E2E] dark:text-slate-200 hover:bg-[#FAF8F4] dark:hover:bg-slate-700"
+                      >
+                        <ShieldCheck className="w-4 h-4 text-[#D4A85A]" />
+                        <span>Subscription Plans</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleNavClick('reports')}
+                        className="w-full flex items-center space-x-2.5 px-4 py-2 text-xs font-semibold text-[#2E2E2E] dark:text-slate-200 hover:bg-[#FAF8F4] dark:hover:bg-slate-700"
+                      >
+                        <BarChart3 className="w-4 h-4 text-[#5B6B7A]" />
+                        <span>Analytics & Export Reports</span>
+                      </button>
+                    </div>
+
+                    <div className="border-t border-[#E8E6E1] dark:border-slate-700 my-1"></div>
+
+                    <div className="py-1">
+                      <button
+                        onClick={() => handleNavClick('about')}
+                        className="w-full flex items-center space-x-2.5 px-4 py-2 text-xs text-[#5B6B7A] dark:text-slate-300 hover:bg-[#FAF8F4] dark:hover:bg-slate-700"
+                      >
+                        <Info className="w-4 h-4" />
+                        <span>About BiteSize</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleNavClick('contact')}
+                        className="w-full flex items-center space-x-2.5 px-4 py-2 text-xs text-[#5B6B7A] dark:text-slate-300 hover:bg-[#FAF8F4] dark:hover:bg-slate-700"
+                      >
+                        <Mail className="w-4 h-4" />
+                        <span>Support & Contact</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleNavClick('help')}
+                        className="w-full flex items-center space-x-2.5 px-4 py-2 text-xs text-[#5B6B7A] dark:text-slate-300 hover:bg-[#FAF8F4] dark:hover:bg-slate-700"
+                      >
+                        <HelpCircle className="w-4 h-4" />
+                        <span>Help & FAQ</span>
+                      </button>
+                    </div>
 
                     <div className="border-t border-[#E8E6E1] dark:border-slate-700 my-1"></div>
 
@@ -213,7 +287,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
                         logout();
                         handleNavClick('landing');
                       }}
-                      className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-[#D96B6B] hover:bg-red-50 dark:hover:bg-red-950/20"
+                      className="w-full flex items-center space-x-2.5 px-4 py-2 text-xs font-semibold text-[#D96B6B] hover:bg-red-50 dark:hover:bg-red-950/20"
                     >
                       <LogOut className="w-4 h-4" />
                       <span>Sign Out</span>
@@ -225,52 +299,113 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => handleNavClick('login')}
-                  className="px-4 py-2 rounded-xl text-sm font-medium text-[#2E2E2E] dark:text-white hover:bg-black/5 transition-colors"
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#5B6B7A] hover:text-[#2E2E2E] dark:hover:text-white"
                 >
                   Log In
                 </button>
                 <button
                   onClick={() => handleNavClick('register')}
-                  className="px-4 py-2 rounded-xl text-sm font-medium bg-[#C75A3B] text-white hover:bg-[#a8472d] shadow-sm transition-all shadow-[#C75A3B]/20"
+                  className="px-4 py-1.5 rounded-xl text-xs font-bold bg-[#C75A3B] text-white hover:bg-[#b0482b] shadow-md shadow-[#C75A3B]/20 transition-transform hover:scale-105"
                 >
-                  Get Started
+                  Sign Up Free
                 </button>
               </div>
             )}
 
-            {/* Mobile Hamburger Button */}
-            {user && (
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-2 rounded-lg text-[#5B6B7A] dark:text-slate-300 hover:bg-[#F8F7F4] dark:hover:bg-slate-800"
-              >
-                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
-            )}
+            {/* Mobile Menu Trigger */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 rounded-lg text-[#5B6B7A] hover:bg-[#F8F7F4] dark:hover:bg-slate-800"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
+
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && user && (
-        <div className="lg:hidden bg-white dark:bg-slate-900 border-b border-[#E8E6E1] dark:border-slate-800 px-4 pt-2 pb-4 space-y-1">
-          {navItems.map(item => {
-            const isActive = currentPage === item.id;
-            return (
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden border-t border-[#E8E6E1] dark:border-slate-800 bg-[#FAF8F4] dark:bg-[#1E2A3A] px-4 pt-3 pb-6 space-y-1">
+          {user ? (
+            <>
+              {loggedInNavItems.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavClick(item.id)}
+                  className={`w-full flex items-center space-x-2 px-3 py-2.5 rounded-xl text-xs font-semibold ${
+                    currentPage === item.id
+                      ? 'bg-[#C75A3B] text-white'
+                      : 'text-[#2E2E2E] dark:text-slate-200 hover:bg-stone-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </button>
+              ))}
+              <div className="border-t border-[#E8E6E1] dark:border-slate-800 my-2"></div>
               <button
-                key={item.id}
-                onClick={() => handleNavClick(item.id)}
-                className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-[#C75A3B] text-white'
-                    : 'text-[#2E2E2E] dark:text-slate-200 hover:bg-[#FAF8F4] dark:hover:bg-slate-800'
-                }`}
+                onClick={() => handleNavClick('goals')}
+                className="w-full flex items-center space-x-2 px-3 py-2 text-xs text-[#5B6B7A]"
               >
-                <item.icon className="w-5 h-5 text-current" />
-                <span>{item.label}</span>
+                <Target className="w-4 h-4" />
+                <span>Goals & Targets</span>
               </button>
-            );
-          })}
+              <button
+                onClick={() => handleNavClick('meal-history')}
+                className="w-full flex items-center space-x-2 px-3 py-2 text-xs text-[#5B6B7A]"
+              >
+                <History className="w-4 h-4" />
+                <span>Meal History</span>
+              </button>
+              <button
+                onClick={() => handleNavClick('progress')}
+                className="w-full flex items-center space-x-2 px-3 py-2 text-xs text-[#5B6B7A]"
+              >
+                <TrendingUp className="w-4 h-4" />
+                <span>Progress & BMI</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => handleNavClick('landing')}
+                className="w-full text-left px-3 py-2 text-xs font-bold text-[#2E2E2E] dark:text-white"
+              >
+                Home
+              </button>
+              <button
+                onClick={() => handleNavClick('scan-meal')}
+                className="w-full text-left px-3 py-2 text-xs font-bold text-[#C75A3B]"
+              >
+                AI Food Scanner
+              </button>
+              <button
+                onClick={() => handleNavClick('meal-planner')}
+                className="w-full text-left px-3 py-2 text-xs font-bold text-[#2E2E2E] dark:text-white"
+              >
+                Meal Planner
+              </button>
+              <button
+                onClick={() => handleNavClick('pricing')}
+                className="w-full text-left px-3 py-2 text-xs font-bold text-[#2E2E2E] dark:text-white"
+              >
+                Pricing & Subscription
+              </button>
+              <button
+                onClick={() => handleNavClick('about')}
+                className="w-full text-left px-3 py-2 text-xs font-bold text-[#2E2E2E] dark:text-white"
+              >
+                About Us
+              </button>
+              <button
+                onClick={() => handleNavClick('contact')}
+                className="w-full text-left px-3 py-2 text-xs font-bold text-[#2E2E2E] dark:text-white"
+              >
+                Contact & Support
+              </button>
+            </>
+          )}
         </div>
       )}
     </header>

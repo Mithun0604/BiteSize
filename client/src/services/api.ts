@@ -58,6 +58,9 @@ export const apiRequest = async <T = any>(
 export const authApi = {
   register: (body: any) => apiRequest('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
   login: (body: any) => apiRequest('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
+  forgotPassword: (email: string) => apiRequest('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) }),
+  resetPassword: (body: { email: string; newPassword: string; resetToken?: string }) =>
+    apiRequest('/auth/reset-password', { method: 'POST', body: JSON.stringify(body) }),
   getProfile: () => apiRequest('/auth/profile'),
   updateProfile: (body: any) => apiRequest('/auth/profile', { method: 'PUT', body: JSON.stringify(body) }),
   deleteAccount: () => apiRequest('/auth/account', { method: 'DELETE' })
@@ -68,6 +71,8 @@ export const mealApi = {
   scanMeal: (formData: FormData) => apiRequest('/meals/scan', { method: 'POST', body: formData }, true),
   confirmMeal: (body: any) => apiRequest('/meals/confirm', { method: 'POST', body: JSON.stringify(body) }),
   getMeals: (date?: string) => apiRequest(`/meals${date ? `?date=${date}` : ''}`),
+  getAllMeals: (limit: number = 50, search?: string) =>
+    apiRequest(`/meals/all?limit=${limit}${search ? `&search=${encodeURIComponent(search)}` : ''}`),
   deleteMeal: (id: number) => apiRequest(`/meals/${id}`, { method: 'DELETE' })
 };
 

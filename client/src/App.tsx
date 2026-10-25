@@ -8,20 +8,47 @@ import { Footer } from './components/Footer';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { MealScannerPage } from './pages/MealScannerPage';
+import { FoodDiaryPage } from './pages/FoodDiaryPage';
+import { MealPlannerPage } from './pages/MealPlannerPage';
+import { MealHistoryPage } from './pages/MealHistoryPage';
+import { ProgressTrackingPage } from './pages/ProgressTrackingPage';
+import { GoalsPreferencesPage } from './pages/GoalsPreferencesPage';
 import { ReceiptScannerPage } from './pages/ReceiptScannerPage';
 import { AICoachPage } from './pages/AICoachPage';
 import { WhatIfComparePage } from './pages/WhatIfComparePage';
 import { PantryPage } from './pages/PantryPage';
 import { ShoppingListPage } from './pages/ShoppingListPage';
 import { SubscriptionsPage } from './pages/SubscriptionsPage';
+import { PricingPage } from './pages/PricingPage';
 import { RewardsPage } from './pages/RewardsPage';
 import { FamilyPage } from './pages/FamilyPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { ProfileSettingsPage } from './pages/ProfileSettingsPage';
 import { HelpFAQPage } from './pages/HelpFAQPage';
+import { AboutPage } from './pages/AboutPage';
+import { ContactPage } from './pages/ContactPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsOfServicePage } from './pages/TermsOfServicePage';
+import { NotFoundPage } from './pages/NotFoundPage';
 import { authApi } from './services/api';
+
+const PUBLIC_PAGES = [
+  'landing',
+  'login',
+  'register',
+  'forgot-password',
+  'pricing',
+  'subscriptions',
+  'about',
+  'contact',
+  'help',
+  'privacy',
+  'terms',
+  'scan-meal'
+];
 
 const AppContent: React.FC = () => {
   const { user, login } = useAuth();
@@ -29,9 +56,9 @@ const AppContent: React.FC = () => {
 
   // Sync initial page based on auth state
   useEffect(() => {
-    if (user && (currentPage === 'landing' || currentPage === 'login' || currentPage === 'register')) {
+    if (user && (currentPage === 'landing' || currentPage === 'login' || currentPage === 'register' || currentPage === 'forgot-password')) {
       setCurrentPage('dashboard');
-    } else if (!user && currentPage !== 'landing' && currentPage !== 'login' && currentPage !== 'register' && currentPage !== 'subscriptions' && currentPage !== 'help') {
+    } else if (!user && !PUBLIC_PAGES.includes(currentPage)) {
       setCurrentPage('landing');
     }
   }, [user]);
@@ -56,10 +83,22 @@ const AppContent: React.FC = () => {
         return <LoginPage onNavigate={setCurrentPage} />;
       case 'register':
         return <RegisterPage onNavigate={setCurrentPage} />;
+      case 'forgot-password':
+        return <ForgotPasswordPage onNavigate={setCurrentPage} />;
       case 'dashboard':
         return <DashboardPage onNavigate={setCurrentPage} />;
       case 'scan-meal':
         return <MealScannerPage onNavigate={setCurrentPage} />;
+      case 'diary':
+        return <FoodDiaryPage onNavigate={setCurrentPage} />;
+      case 'meal-planner':
+        return <MealPlannerPage onNavigate={setCurrentPage} />;
+      case 'meal-history':
+        return <MealHistoryPage onNavigate={setCurrentPage} />;
+      case 'progress':
+        return <ProgressTrackingPage onNavigate={setCurrentPage} />;
+      case 'goals':
+        return <GoalsPreferencesPage onNavigate={setCurrentPage} />;
       case 'scan-receipt':
         return <ReceiptScannerPage onNavigate={setCurrentPage} />;
       case 'coach':
@@ -70,6 +109,8 @@ const AppContent: React.FC = () => {
         return <PantryPage onNavigate={setCurrentPage} />;
       case 'shopping-list':
         return <ShoppingListPage onNavigate={setCurrentPage} />;
+      case 'pricing':
+        return <PricingPage onNavigate={setCurrentPage} />;
       case 'subscriptions':
         return <SubscriptionsPage onNavigate={setCurrentPage} />;
       case 'rewards':
@@ -80,10 +121,18 @@ const AppContent: React.FC = () => {
         return <ReportsPage onNavigate={setCurrentPage} />;
       case 'profile':
         return <ProfileSettingsPage onNavigate={setCurrentPage} />;
+      case 'about':
+        return <AboutPage onNavigate={setCurrentPage} />;
+      case 'contact':
+        return <ContactPage onNavigate={setCurrentPage} />;
       case 'help':
         return <HelpFAQPage onNavigate={setCurrentPage} />;
+      case 'privacy':
+        return <PrivacyPolicyPage onNavigate={setCurrentPage} />;
+      case 'terms':
+        return <TermsOfServicePage onNavigate={setCurrentPage} />;
       default:
-        return <DashboardPage onNavigate={setCurrentPage} />;
+        return <NotFoundPage onNavigate={setCurrentPage} />;
     }
   };
 
