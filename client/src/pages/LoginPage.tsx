@@ -70,7 +70,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
             <span>Instant Demo Access</span>
           </div>
           <p className="text-[11px] text-[#5B6B7A] dark:text-slate-300">
-            Explore with pre-seeded Reliance receipts, daily meals, pantry, and Bite Currency progress.
+            Shared sample profile with example receipts and meals. Do not enter personal information; demo data is visible to anyone using this account.
           </p>
           <button
             type="button"

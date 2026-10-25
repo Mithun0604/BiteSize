@@ -118,7 +118,7 @@ In non-production development, the database is seeded with sample grocery receip
 - **Password**: `bitesize123`
 *(Or click the 1-Click "Sign In as Aarav (Demo User)" button on the login screen!)*
 
-The demo account is not seeded in production deployments.
+Production Vercel deployments seed this shared sample account only when ENABLE_DEMO_DATA=true is set. The account is shared and contains sample data; never use it for personal information. Demo sign-in requires this flag in production.
 
 ---
 
