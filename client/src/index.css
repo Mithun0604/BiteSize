@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-brand-terracotta: #B85B3E;
@@ -264,3 +265,54 @@ h1, h2, h3, .font-serif {
 }
 .home-footer-links button:hover,
 .home-footer button:hover { color: #b85b3e; }
+/* Dark mode follows the persisted .dark class toggled on the document root. */
+.dark body {
+  background-color: #17261f;
+  color: #f5f1e8;
+}
+.dark .home-page {
+  background: #17261f;
+  color: #f5f1e8;
+}
+.dark .home-nav-link { color: #d1ddd1; }
+.dark .home-nav-link:hover,
+.dark .home-mobile-link:hover { color: #f0aa8e; }
+.dark .home-mobile-link { color: #e4e9df; }
+.dark .home-eyebrow {
+  border-color: #3a5947;
+  background: #243d30;
+  color: #d5e5d4;
+}
+.dark .home-title,
+.dark .home-section-title { color: #f5f1e8; }
+.dark .home-title span { color: #e99475; }
+.dark .home-intro,
+.dark .home-small-note,
+.dark .home-benefit p,
+.dark .home-step p,
+.dark .home-cta p { color: #c1cec3; }
+.dark .home-bowl-art {
+  background: radial-gradient(ellipse at 50% 47%, #2a4034 0%, #263a30 58%, transparent 59%);
+}
+.dark .home-art-note {
+  border-color: #3b5546;
+  background: #20352a;
+  color: #dce8db;
+}
+.dark .home-benefit { border-color: #354b3d; }
+.dark .home-benefit h2,
+.dark .home-step h3,
+.dark .home-cta h2 { color: #e9efe5; }
+.dark .home-how { border-color: #354b3d; }
+.dark .home-step {
+  border-color: #3a5143;
+  background: #20352a;
+}
+.dark .home-cta { background: #243d30; }
+.dark .home-footer {
+  background: #13211b;
+  color: #c1cec3;
+}
+.dark .home-footer h2 { color: #e0eadf; }
+.dark .home-footer-brand { color: #f5f1e8; }
+.dark .home-footer .border-t { border-color: #354b3d; }
