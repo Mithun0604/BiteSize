@@ -33,7 +33,6 @@ import { ContactPage } from './pages/ContactPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import { NotFoundPage } from './pages/NotFoundPage';
-import { authApi } from './services/api';
 
 const PUBLIC_PAGES = [
   'landing',
@@ -51,7 +50,7 @@ const PUBLIC_PAGES = [
 ];
 
 const AppContent: React.FC = () => {
-  const { user, login } = useAuth();
+  const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState<string>('landing');
 
   // Sync initial page based on auth state
@@ -63,22 +62,10 @@ const AppContent: React.FC = () => {
     }
   }, [user]);
 
-  const handleQuickDemo = async () => {
-    try {
-      const res = await authApi.login({ email: 'demo@bitesize.app', password: 'bitesize123' });
-      if (res.success) {
-        login(res.token, res.user, res.profile);
-        setCurrentPage('dashboard');
-      }
-    } catch (err: any) {
-      alert("Demo sign-in error: " + err.message);
-    }
-  };
-
   const renderCurrentPage = () => {
     switch (currentPage) {
       case 'landing':
-        return <LandingPage onNavigate={setCurrentPage} onQuickDemo={handleQuickDemo} />;
+        return <LandingPage onNavigate={setCurrentPage} />;
       case 'login':
         return <LoginPage onNavigate={setCurrentPage} />;
       case 'register':
@@ -137,7 +124,7 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF8F4] dark:bg-[#1E2A3A] text-[#2E2E2E] dark:text-white transition-colors">
+    <div className="min-h-screen flex flex-col bg-[#FBF7EF] dark:bg-[#1F342C] text-[#2E2E2E] dark:text-white transition-colors">
       <Navbar currentPage={currentPage} onNavigate={setCurrentPage} />
       <main className="flex-1">
         {renderCurrentPage()}

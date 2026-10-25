@@ -1,416 +1,106 @@
 import React from 'react';
-import {
-  Camera,
-  Receipt,
-  Sparkles,
-  ArrowRightLeft,
-  CheckCircle2,
-  Coins,
-  ArrowRight,
-  ShieldCheck,
-  TrendingDown,
-  Apple
-} from 'lucide-react';
+import { ArrowRight, BarChart3, Camera, Check, Leaf, ShoppingBasket, Sprout } from 'lucide-react';
 
 interface LandingPageProps {
   onNavigate: (page: string) => void;
-  onQuickDemo: () => void;
+
 }
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onQuickDemo }) => {
-  return (
-    <div className="space-y-24 pb-20">
-      
-      {/* 1. HERO SECTION */}
-      <section className="relative pt-12 md:pt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto space-y-6">
-          <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-[#F6D6C9]/60 border border-[#C75A3B]/20 text-[#C75A3B] text-xs font-semibold tracking-wide">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>AI-Powered Grocery & Nutrition Intelligence Platform</span>
-          </div>
+const BowlIllustration = () => (
+  <div className="home-bowl-art" aria-label="Illustration of a balanced meal" role="img">
+    <svg viewBox="0 0 520 480" className="h-full w-full" aria-hidden="true">
+      <ellipse cx="260" cy="428" rx="170" ry="24" fill="#34594A" opacity=".12" />
+      <path d="M74 112 398 31l78 305-326 82z" fill="#F2E5D5" opacity=".75" />
+      <path d="M111 276c0 93 66 151 149 151s149-58 149-151H111Z" fill="#E7D8C5" />
+      <ellipse cx="260" cy="276" rx="149" ry="53" fill="#FFFDF8" />
+      <ellipse cx="260" cy="269" rx="126" ry="40" fill="#DDE9DC" />
+      <path d="M160 271c15-43 62-62 86-37 17 18-4 53-37 66-27 10-56-1-49-29Z" fill="#507D64" />
+      <path d="M244 240c8-35 51-51 71-28 18 21-7 54-39 61-24 5-38-11-32-33Z" fill="#6D956F" />
+      <path d="M326 256c10-32 48-41 63-19 14 21-7 47-34 52-22 4-36-12-29-33Z" fill="#3F6B54" />
+      <circle cx="209" cy="291" r="20" fill="#C85F43" /><circle cx="341" cy="292" r="17" fill="#D96E4E" />
+      <circle cx="209" cy="291" r="7" fill="#F6C7A7" /><circle cx="341" cy="292" r="6" fill="#F6C7A7" />
+      <path d="M263 300c18-27 43-34 52-21 10 15-12 39-37 48-17 6-29-8-15-27Z" fill="#E7A35D" />
+      <path d="M148 245c28-23 54-23 66-9l-30 21c-14 10-29 4-36-12Z" fill="#E3B767" />
+      <path d="M275 224c25-22 54-19 63-2l-33 19c-15 9-27 1-30-17Z" fill="#F1C56E" />
+      <circle cx="174" cy="303" r="6" fill="#E6C780" /><circle cx="287" cy="265" r="5" fill="#E6C780" />
+      <circle cx="309" cy="317" r="6" fill="#E6C780" /><circle cx="370" cy="269" r="5" fill="#E6C780" />
+      <path d="M175 335c27 19 53 23 81 17M279 340c30 10 55 7 79-8" stroke="#B8CDB9" strokeWidth="5" strokeLinecap="round" />
+      <path d="M112 365c36 55 84 73 148 72 63-1 112-25 148-72" fill="none" stroke="#D7C6B0" strokeWidth="10" strokeLinecap="round" />
+      <path d="M118 155c-1-40 32-70 67-68-2 34-25 61-67 68ZM386 142c6-40 39-65 73-59-8 33-34 57-73 59Z" fill="#74917C" opacity=".65" />
+      <path d="M147 108c7-27 27-43 53-41-6 24-25 40-53 41Z" fill="#C86A4B" opacity=".85" />
+    </svg>
+    <div className="home-art-note"><Sprout size={16} /><span>Good food, made simpler</span></div>
+  </div>
+);
 
-          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#2E2E2E] dark:text-white tracking-tight leading-[1.15]">
-            Better food choices. <br />
-            <span className="text-[#C75A3B]">Smarter spending.</span>
-          </h1>
-
-          <p className="text-base sm:text-lg text-[#5B6B7A] dark:text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed">
-            BiteSize turns grocery receipts and meal photos into personalized guidance. Understand what you buy, what you eat, and how to optimize both with AI.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <button
-              onClick={() => onNavigate('register')}
-              className="w-full sm:w-auto px-7 py-3.5 rounded-xl font-semibold text-sm bg-[#C75A3B] text-white shadow-lg shadow-[#C75A3B]/25 hover:bg-[#b0482b] transition-all hover:scale-105 flex items-center justify-center space-x-2"
-            >
-              <span>Get Started Free</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
-              onClick={onQuickDemo}
-              className="w-full sm:w-auto px-7 py-3.5 rounded-xl font-semibold text-sm bg-white dark:bg-slate-800 text-[#2E2E2E] dark:text-white border border-[#E8E6E1] dark:border-slate-700 shadow-sm hover:border-[#C75A3B] transition-all flex items-center justify-center space-x-2"
-            >
-              <span>Explore Interactive Demo</span>
-              <span className="text-xs px-2 py-0.5 rounded bg-[#FAF8F4] dark:bg-slate-700 text-[#C75A3B] font-bold">1-Click</span>
-            </button>
-          </div>
-
-          <div className="flex items-center justify-center space-x-6 text-xs text-[#5B6B7A] dark:text-slate-400 pt-3">
-            <span className="flex items-center space-x-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#2E7D6B]" />
-              <span>No credit card required</span>
-            </span>
-            <span className="flex items-center space-x-1.5">
-              <ShieldCheck className="w-4 h-4 text-[#2E7D6B]" />
-              <span>IFCT & ICMR-NIN Verified Data</span>
-            </span>
-            <span className="flex items-center space-x-1.5 hidden md:flex">
-              <Coins className="w-4 h-4 text-[#D4A85A]" />
-              <span>7.5% Bite Currency Rewards</span>
-            </span>
-          </div>
+export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => (
+  <div className="home-page">
+    <section className="home-hero mx-auto grid max-w-7xl items-center gap-8 px-5 py-10 sm:px-8 sm:py-14 lg:grid-cols-[1fr_1.05fr] lg:gap-12 lg:px-12 lg:py-16">
+      <div className="relative z-10 max-w-xl">
+        <div className="home-eyebrow"><Leaf size={15} /> A little more balance, every day</div>
+        <h1 className="home-title">
+          Better food choices.<br />
+          <span>Smarter spending.</span>
+        </h1>
+        <p className="home-intro">
+          Know what you eat and where your grocery money goes. BiteSize brings your meals, shopping and goals together in one calm, simple place.
+        </p>
+        <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+          <button className="home-primary-button" onClick={() => onNavigate('register')}>
+            Get started free <ArrowRight size={17} />
+          </button>
+          <button className="home-secondary-button" onClick={() => onNavigate('pricing')}>
+            View plans
+          </button>
         </div>
+        <p className="home-small-note"><Check size={15} /> Your food details stay yours. Start with the basics.</p>
+      </div>
+      <BowlIllustration />
+    </section>
 
-        {/* Brand App Preview Cards Grid (Matches Uploaded Design Sheet!) */}
-        <div className="mt-14 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Card 1: Daily Nutrition & Macros */}
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-[#E8E6E1] dark:border-slate-700 shadow-soft">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-semibold text-[#5B6B7A] dark:text-slate-400 uppercase tracking-wider">Daily Nutrition</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-[#2E7D6B]/10 text-[#2E7D6B] font-medium">On Track</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="w-20 h-20 rounded-full border-4 border-[#C75A3B] flex items-center justify-center">
-                <div className="text-center">
-                  <span className="text-lg font-bold text-[#2E2E2E] dark:text-white">72%</span>
-                  <span className="block text-[9px] text-[#5B6B7A]">Complete</span>
-                </div>
-              </div>
-              <div className="space-y-1.5 text-xs text-[#5B6B7A] dark:text-slate-300">
-                <div className="flex justify-between space-x-4">
-                  <span className="flex items-center"><span className="w-2 h-2 rounded-full bg-[#C75A3B] mr-1.5"></span>Protein</span>
-                  <span className="font-semibold text-[#2E2E2E] dark:text-white">62g / 85g</span>
-                </div>
-                <div className="flex justify-between space-x-4">
-                  <span className="flex items-center"><span className="w-2 h-2 rounded-full bg-[#D4A85A] mr-1.5"></span>Carbs</span>
-                  <span className="font-semibold text-[#2E2E2E] dark:text-white">180g / 250g</span>
-                </div>
-                <div className="flex justify-between space-x-4">
-                  <span className="flex items-center"><span className="w-2 h-2 rounded-full bg-[#5B6B7A] mr-1.5"></span>Fats</span>
-                  <span className="font-semibold text-[#2E2E2E] dark:text-white">42g / 60g</span>
-                </div>
-              </div>
-            </div>
-          </div>
+    <section className="mx-auto grid max-w-6xl gap-4 px-5 pb-12 sm:grid-cols-3 sm:px-8 lg:px-12" aria-label="BiteSize benefits">
+      <article className="home-benefit">
+        <span className="home-benefit-icon sage"><Leaf size={22} /></span>
+        <div><h2>Personalised nutrition</h2><p>Ideas that fit your goals and preferences.</p></div>
+      </article>
+      <article className="home-benefit">
+        <span className="home-benefit-icon peach"><ShoppingBasket size={22} /></span>
+        <div><h2>Clearer grocery spending</h2><p>See your shopping in one easy view.</p></div>
+      </article>
+      <article className="home-benefit">
+        <span className="home-benefit-icon blue"><BarChart3 size={22} /></span>
+        <div><h2>Simple insights</h2><p>Small steps for better everyday choices.</p></div>
+      </article>
+    </section>
 
-          {/* Card 2: Monthly Grocery Spend */}
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-[#E8E6E1] dark:border-slate-700 shadow-soft">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-semibold text-[#5B6B7A] dark:text-slate-400 uppercase tracking-wider">Monthly Spending</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-[#2E7D6B]/10 text-[#2E7D6B] font-medium flex items-center">
-                <TrendingDown className="w-3 h-3 mr-0.5" /> 12% vs last mo
-              </span>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-baseline space-x-2">
-                <span className="text-3xl font-extrabold text-[#2E2E2E] dark:text-white">₹4,250</span>
-                <span className="text-xs text-[#5B6B7A]">/ ₹7,500 budget</span>
-              </div>
-              <div className="w-full bg-[#E8E6E1] dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-                <div className="bg-gradient-to-r from-[#5B6B7A] to-[#C75A3B] h-full rounded-full" style={{ width: '56%' }}></div>
-              </div>
-              <p className="text-[11px] text-[#5B6B7A] dark:text-slate-400">
-                ₹3,250 remaining buffer for remaining 18 days.
-              </p>
-            </div>
-          </div>
+    <section id="how-it-works" className="home-how mx-auto max-w-6xl px-5 py-12 sm:px-8 lg:px-12">
+      <div className="max-w-2xl">
+        <span className="home-kicker">HOW IT WORKS</span>
+        <h2 className="home-section-title">A simpler way to feel in control.</h2>
+      </div>
+      <div className="mt-7 grid gap-4 md:grid-cols-3">
+        {[
+          { number: '01', icon: Camera, title: 'Add a meal or receipt', body: 'Upload a photo when you want help understanding a meal or a shop.' },
+          { number: '02', icon: BarChart3, title: 'Review your picture', body: 'See your nutrition and spending together, with clear estimates.' },
+          { number: '03', icon: Sprout, title: 'Choose your next step', body: 'Make a small plan that works for your preferences and budget.' },
+        ].map(({ number, icon: Icon, title, body }) => (
+          <article key={number} className="home-step">
+            <div className="flex items-center justify-between"><span className="home-step-number">{number}</span><Icon size={21} /></div>
+            <h3>{title}</h3><p>{body}</p>
+          </article>
+        ))}
+      </div>
+    </section>
 
-          {/* Card 3: Bite Currency Rewards */}
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-[#E8E6E1] dark:border-slate-700 shadow-soft">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-semibold text-[#D4A85A] uppercase tracking-wider">You Earned Bite Currency!</span>
-              <Coins className="w-4 h-4 text-[#D4A85A]" />
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#D4A85A] to-[#F6E3B7] flex items-center justify-center font-bold text-white text-xl shadow-md shadow-[#D4A85A]/20">
-                ₹
-              </div>
-              <div>
-                <span className="text-2xl font-extrabold text-[#2E2E2E] dark:text-white">₹320</span>
-                <p className="text-[11px] text-[#5B6B7A] dark:text-slate-400">7.5% of eligible monthly bill</p>
-              </div>
-            </div>
-            <div className="mt-3 pt-3 border-t border-[#E8E6E1] dark:border-slate-700 flex items-center justify-between text-xs">
-              <span className="text-[#5B6B7A]">Redeemable via First Club</span>
-              <span className="font-semibold text-[#C75A3B]">Claim Voucher →</span>
-            </div>
-          </div>
-        </div>
-      </section>
+    <section className="mx-auto max-w-6xl px-5 py-10 sm:px-8 lg:px-12">
+      <div className="home-cta">
+        <div><span className="home-kicker">BITE BY BITE</span><h2>Make everyday choices a little easier.</h2><p>Create an account to start building your own food and grocery picture.</p></div>
+        <button className="home-primary-button" onClick={() => onNavigate('register')}>Create your account <ArrowRight size={17} /></button>
+      </div>
+    </section>
 
-      {/* 2. THE 4 GAPS BITESIZE SOLVES */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <h2 className="font-serif text-3xl font-bold text-[#2E2E2E] dark:text-white">
-            Connecting what you buy, what you eat, and what you can afford
-          </h2>
-          <p className="text-sm text-[#5B6B7A] dark:text-slate-400 mt-2">
-            Most apps only solve one side of the equation. BiteSize bridges the entire lifestyle loop.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-[#FAF8F4] dark:bg-slate-800/60 p-6 rounded-2xl border border-[#E8E6E1] dark:border-slate-700 space-y-3">
-            <div className="w-9 h-9 rounded-xl bg-[#C75A3B]/10 text-[#C75A3B] flex items-center justify-center font-bold">1</div>
-            <h3 className="font-semibold text-base text-[#2E2E2E] dark:text-white">The Nutrition Gap</h3>
-            <p className="text-xs text-[#5B6B7A] dark:text-slate-400 leading-relaxed">
-              People rarely know if their grocery basket matches their health goals, and complex food labels are hard to compare.
-            </p>
-          </div>
-
-          <div className="bg-[#FAF8F4] dark:bg-slate-800/60 p-6 rounded-2xl border border-[#E8E6E1] dark:border-slate-700 space-y-3">
-            <div className="w-9 h-9 rounded-xl bg-[#5B6B7A]/10 text-[#5B6B7A] flex items-center justify-center font-bold">2</div>
-            <h3 className="font-semibold text-base text-[#2E2E2E] dark:text-white">The Budgeting Gap</h3>
-            <p className="text-xs text-[#5B6B7A] dark:text-slate-400 leading-relaxed">
-              A supermarket receipt shows a grand total, but never reveals what individual meals cost per serving or where leaks occur.
-            </p>
-          </div>
-
-          <div className="bg-[#FAF8F4] dark:bg-slate-800/60 p-6 rounded-2xl border border-[#E8E6E1] dark:border-slate-700 space-y-3">
-            <div className="w-9 h-9 rounded-xl bg-[#D4A85A]/10 text-[#D4A85A] flex items-center justify-center font-bold">3</div>
-            <h3 className="font-semibold text-base text-[#2E2E2E] dark:text-white">The Daily Tracking Gap</h3>
-            <p className="text-xs text-[#5B6B7A] dark:text-slate-400 leading-relaxed">
-              Traditional calorie counting requires laborious manual ingredient searches. BiteSize lets you snap a photo with honest AI calibration.
-            </p>
-          </div>
-
-          <div className="bg-[#FAF8F4] dark:bg-slate-800/60 p-6 rounded-2xl border border-[#E8E6E1] dark:border-slate-700 space-y-3">
-            <div className="w-9 h-9 rounded-xl bg-[#2E7D6B]/10 text-[#2E7D6B] flex items-center justify-center font-bold">4</div>
-            <h3 className="font-semibold text-base text-[#2E2E2E] dark:text-white">The Decision Gap</h3>
-            <p className="text-xs text-[#5B6B7A] dark:text-slate-400 leading-relaxed">
-              Generic advice tells you what's "good" or "bad". Our "What If I Changed This?" tool reveals real nutrition and cost trade-offs.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. CORE HIGHLIGHT: AI MEAL SCANNER */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-br from-white to-[#F8F7F4] dark:from-slate-800 dark:to-slate-900 rounded-3xl p-8 sm:p-12 border border-[#E8E6E1] dark:border-slate-700 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-          <div className="space-y-6">
-            <span className="px-3 py-1 rounded-full bg-[#C75A3B]/10 text-[#C75A3B] text-xs font-semibold">
-              Highest Accuracy Priority
-            </span>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#2E2E2E] dark:text-white leading-tight">
-              AI-Powered Meal Scanner with Calibrated Precision
-            </h2>
-            <p className="text-sm text-[#5B6B7A] dark:text-slate-300 leading-relaxed">
-              We never fabricate calorie counts or pretend AI estimates are laboratory measurements. BiteSize identifies components, applies authentic ICMR-NIN Indian Food Composition Tables, and prompts you to confirm cooking oils, portions, and sauces.
-            </p>
-            <ul className="space-y-3 text-xs text-[#2E2E2E] dark:text-slate-300">
-              <li className="flex items-center space-x-2">
-                <CheckCircle2 className="w-4 h-4 text-[#2E7D6B] shrink-0" />
-                <span>Transparent uncertainty indicators (±10% to ±15%)</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <CheckCircle2 className="w-4 h-4 text-[#2E7D6B] shrink-0" />
-                <span>Adjustable cooking methods (tempering ghee, light sauté, boiled)</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <CheckCircle2 className="w-4 h-4 text-[#2E7D6B] shrink-0" />
-                <span>One-click save to daily nutrition tracker and macro rings</span>
-              </li>
-            </ul>
-            <div>
-              <button
-                onClick={() => onNavigate('scan-meal')}
-                className="px-6 py-3 rounded-xl font-semibold text-xs bg-[#C75A3B] text-white hover:bg-[#b0482b] transition-all flex items-center space-x-2 shadow-md shadow-[#C75A3B]/20"
-              >
-                <Camera className="w-4 h-4" />
-                <span>Try Food Scanner Now</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-[#FAF8F4] dark:bg-slate-800 p-6 rounded-2xl border border-[#E8E6E1] dark:border-slate-700 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E8E6E1] dark:border-slate-700">
-              <div>
-                <p className="text-xs font-semibold text-[#2E2E2E] dark:text-white">Moong Dal Tadka with Steamed Rice</p>
-                <p className="text-[11px] text-[#5B6B7A]">Visual confidence: 91% • ±10% variance</p>
-              </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#2E7D6B]/15 text-[#2E7D6B]">
-                IFCT Verified
-              </span>
-            </div>
-
-            <div className="grid grid-cols-4 gap-2 text-center">
-              <div className="p-2.5 rounded-xl bg-white dark:bg-slate-700">
-                <span className="block text-xs text-[#5B6B7A]">Calories</span>
-                <span className="font-bold text-sm text-[#2E2E2E] dark:text-white">460</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-white dark:bg-slate-700">
-                <span className="block text-xs text-[#5B6B7A]">Protein</span>
-                <span className="font-bold text-sm text-[#C75A3B]">17.8g</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-white dark:bg-slate-700">
-                <span className="block text-xs text-[#5B6B7A]">Carbs</span>
-                <span className="font-bold text-sm text-[#2E2E2E] dark:text-white">74.0g</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-white dark:bg-slate-700">
-                <span className="block text-xs text-[#5B6B7A]">Fiber</span>
-                <span className="font-bold text-sm text-[#2E7D6B]">6.5g</span>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-xl bg-[#FAF8F4] dark:bg-slate-700/60 border border-[#E8E6E1] dark:border-slate-600 text-xs text-[#5B6B7A] dark:text-slate-300">
-              <span className="font-semibold text-[#C75A3B]">Clarification confirmed:</span> 1/2 tsp ghee used for cumin tadka tempering (+22 kcal).
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. THREE SUBSCRIPTION PLANS */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <h2 className="font-serif text-3xl font-bold text-[#2E2E2E] dark:text-white">
-            Transparent, Predictable Plans
-          </h2>
-          <p className="text-sm text-[#5B6B7A] dark:text-slate-400 mt-2">
-            Start free with Small Bite, unlock deep personal coaching with Big Bite, or coordinate your entire household with Shared Bite.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Small Bite */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-[#E8E6E1] dark:border-slate-700 shadow-soft flex flex-col justify-between">
-            <div>
-              <span className="text-xs font-semibold text-[#5B6B7A] uppercase tracking-wider">Free Forever</span>
-              <h3 className="font-serif text-2xl font-bold text-[#2E2E2E] dark:text-white mt-1">Small Bite</h3>
-              <p className="text-3xl font-extrabold text-[#2E2E2E] dark:text-white mt-4">₹0 <span className="text-xs font-normal text-[#5B6B7A]">/ month</span></p>
-              <p className="text-xs text-[#5B6B7A] dark:text-slate-400 mt-2 leading-relaxed">
-                A useful taste of receipt scanning and nutrition tracking with fair-use limits.
-              </p>
-
-              <div className="border-t border-[#E8E6E1] dark:border-slate-700 my-6"></div>
-
-              <ul className="space-y-3 text-xs text-[#2E2E2E] dark:text-slate-300">
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#2E7D6B]" />
-                  <span>3 receipt scans per month</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#2E7D6B]" />
-                  <span>10 AI meal photo scans</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#2E7D6B]" />
-                  <span>Basic grocery spend overview</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#2E7D6B]" />
-                  <span>1 individual profile</span>
-                </li>
-              </ul>
-            </div>
-
-            <button
-              onClick={() => onNavigate('register')}
-              className="mt-8 w-full py-3 rounded-xl text-xs font-semibold border border-[#E8E6E1] dark:border-slate-700 hover:border-[#C75A3B] transition-colors"
-            >
-              Get Started Free
-            </button>
-          </div>
-
-          {/* Big Bite - Most Popular */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border-2 border-[#C75A3B] shadow-xl relative flex flex-col justify-between">
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[#C75A3B] text-white text-[11px] font-bold tracking-wider uppercase">
-              Most Popular
-            </div>
-
-            <div>
-              <span className="text-xs font-semibold text-[#C75A3B] uppercase tracking-wider">Premium Individual</span>
-              <h3 className="font-serif text-2xl font-bold text-[#2E2E2E] dark:text-white mt-1">Big Bite</h3>
-              <p className="text-3xl font-extrabold text-[#2E2E2E] dark:text-white mt-4">₹199 <span className="text-xs font-normal text-[#5B6B7A]">/ month</span></p>
-              <p className="text-xs text-[#5B6B7A] dark:text-slate-400 mt-2 leading-relaxed">
-                The best value for individuals seeking ongoing nutrition coaching and smart basket optimization.
-              </p>
-
-              <div className="border-t border-[#E8E6E1] dark:border-slate-700 my-6"></div>
-
-              <ul className="space-y-3 text-xs text-[#2E2E2E] dark:text-slate-300">
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#C75A3B]" />
-                  <span className="font-medium">Unlimited fair-use receipt & meal scans</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#C75A3B]" />
-                  <span>Full BiteSize AI Coach conversational assistant</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#C75A3B]" />
-                  <span>"What If I Changed This?" comparisons</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#C75A3B]" />
-                  <span>Pantry-to-Plate AI & Smart Shopping List</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#C75A3B]" />
-                  <span>7.5% Bite Currency rewards program</span>
-                </li>
-              </ul>
-            </div>
-
-            <button
-              onClick={() => onNavigate('subscriptions')}
-              className="mt-8 w-full py-3 rounded-xl text-xs font-semibold bg-[#C75A3B] text-white hover:bg-[#b0482b] transition-all shadow-md shadow-[#C75A3B]/25"
-            >
-              Choose Big Bite
-            </button>
-          </div>
-
-          {/* Shared Bite */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-[#E8E6E1] dark:border-slate-700 shadow-soft flex flex-col justify-between">
-            <div>
-              <span className="text-xs font-semibold text-[#5B6B7A] uppercase tracking-wider">Premium Family</span>
-              <h3 className="font-serif text-2xl font-bold text-[#2E2E2E] dark:text-white mt-1">Shared Bite</h3>
-              <p className="text-3xl font-extrabold text-[#2E2E2E] dark:text-white mt-4">₹399 <span className="text-xs font-normal text-[#5B6B7A]">/ month</span></p>
-              <p className="text-xs text-[#5B6B7A] dark:text-slate-400 mt-2 leading-relaxed">
-                Coordinated grocery planning under one shared household budget with private personal meal logs.
-              </p>
-
-              <div className="border-t border-[#E8E6E1] dark:border-slate-700 my-6"></div>
-
-              <ul className="space-y-3 text-xs text-[#2E2E2E] dark:text-slate-300">
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#2E7D6B]" />
-                  <span>Everything in Big Bite</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#2E7D6B]" />
-                  <span className="font-medium">Up to 5 family member profiles</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#2E7D6B]" />
-                  <span>One shared household grocery budget & pantry</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#2E7D6B]" />
-                  <span>Separate confidential meal logs per member</span>
-                </li>
-              </ul>
-            </div>
-
-            <button
-              onClick={() => onNavigate('subscriptions')}
-              className="mt-8 w-full py-3 rounded-xl text-xs font-semibold bg-[#5B6B7A] text-white hover:bg-[#495764] transition-colors"
-            >
-              Choose Shared Bite
-            </button>
-          </div>
-        </div>
-      </section>
-
-    </div>
-  );
-};
+    <p className="mx-auto max-w-6xl px-5 pb-10 text-center text-xs text-[#66756C] sm:px-8 lg:px-12">
+      Nutrition insights are estimates for general information and are not medical advice.
+    </p>
+  </div>
+);
