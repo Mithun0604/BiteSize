@@ -19,7 +19,7 @@ const generateGeminiContent = async ({ prompt, filePath, mimeType, responseMimeT
     );
   }
 
-  const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+  const model = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
   const parts = [{ text: prompt }];
   if (filePath) {
     const file = fs.readFileSync(filePath);

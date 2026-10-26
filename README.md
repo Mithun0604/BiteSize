@@ -131,7 +131,7 @@ JWT_SECRET=replace-with-a-long-random-secret
 # Required for AI meal scanning, receipt OCR, and personalized AI Coach responses.
 # Without a key, these features report that setup is required; they do not generate sample results.
 GEMINI_API_KEY=
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-3.8-flash
 
 # Configure both for live Razorpay checkout. Sandbox is disabled in production by default.
 RAZORPAY_KEY_ID=
