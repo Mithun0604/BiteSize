@@ -83,7 +83,9 @@ app.delete('/api/auth/account', authenticateToken, authCtrl.deleteAccount);
 
 // 2. Meal Scanner & Daily Nutrition Routes
 app.post('/api/meals/scan', authenticateToken, mealUpload.single('image'), mealCtrl.scanMeal);
-app.get('/api/foods/search', authenticateToken, (req, res) => {
+// Food catalog data is static and contains no user information. Keep search
+// available even when a user's session has expired so manual meal entry works.
+app.get('/api/foods/search', (req, res) => {
   const query = String(req.query.q || '').trim().slice(0, 80);
   const foods = searchFoods(query).slice(0, 20).map(food => ({
     id: food.id,
