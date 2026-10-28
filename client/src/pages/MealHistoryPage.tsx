@@ -62,7 +62,7 @@ export const MealHistoryPage: React.FC<MealHistoryProps> = ({ onNavigate }) => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#C75A3B]/10 text-[#C75A3B] text-xs font-semibold">
+          <div className="section-eyebrow">
             <History className="w-3.5 h-3.5" />
             <span>Complete Meal Log Archive</span>
           </div>

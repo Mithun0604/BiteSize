@@ -60,7 +60,7 @@ export const ProgressTrackingPage: React.FC<ProgressTrackingProps> = ({ onNaviga
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#2E7D6B]/15 text-[#2E7D6B] text-xs font-semibold">
+          <div className="section-eyebrow">
             <TrendingUp className="w-3.5 h-3.5" />
             <span>Health & Nutrition Trajectory</span>
           </div>
@@ -227,8 +227,8 @@ export const ProgressTrackingPage: React.FC<ProgressTrackingProps> = ({ onNaviga
                   <span className="font-semibold text-[#2E2E2E] dark:text-white">{cat.category}</span>
                   <span className="font-bold">₹{cat.inr} ({cat.pct}%)</span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-stone-100 dark:bg-slate-700 overflow-hidden">
-                  <div className={`h-full rounded-full ${cat.color}`} style={{ width: `${cat.pct}%` }} />
+                <div className="w-full h-2 ui-progress-track bg-stone-100 dark:bg-slate-700 overflow-hidden">
+                  <div className={`h-full ui-progress-fill ${cat.color}`} style={{ width: `${cat.pct}%` }} />
                 </div>
               </div>
             ))}

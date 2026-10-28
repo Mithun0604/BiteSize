@@ -149,7 +149,7 @@ export const ReceiptScannerPage: React.FC<ReceiptScannerProps> = ({ onNavigate }
       
       {/* Title */}
       <div className="space-y-2">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#5B6B7A]/10 text-[#5B6B7A] text-xs font-semibold">
+        <div className="section-eyebrow">
           <Receipt className="w-3.5 h-3.5" />
           <span>OCR Receipt Intelligence & Budgeting</span>
         </div>

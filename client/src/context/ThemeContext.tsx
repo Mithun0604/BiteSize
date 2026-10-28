@@ -11,12 +11,20 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('bitesize_theme');
-    return (saved as Theme) || 'light';
+    try {
+      const saved = localStorage.getItem('bitesize_theme');
+      return saved === 'light' || saved === 'dark' ? saved : 'dark';
+    } catch {
+      return 'dark';
+    }
   });
 
   useEffect(() => {
-    localStorage.setItem('bitesize_theme', theme);
+    try {
+      localStorage.setItem('bitesize_theme', theme);
+    } catch {
+      // Theme changes still apply when browser storage is unavailable.
+    }
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {

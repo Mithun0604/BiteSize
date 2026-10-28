@@ -86,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
             <div>
               <div className="flex items-center space-x-1.5">
                 <span className="font-serif text-2xl font-bold tracking-tight text-[#2E2E2E] dark:text-white">BiteSize</span>
-                <span className="w-2 h-2 rounded-full bg-[#B85B3E]"></span>
+                <span className="w-2 h-2 ui-dot bg-[#B85B3E]"></span>
               </div>
               <p className="text-[10px] text-[#68766E] dark:text-slate-400 font-medium tracking-wide hidden sm:block">
                 Your groceries, understood.
@@ -144,7 +144,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   className="flex items-center space-x-2 p-1.5 rounded-xl border border-[#E8E0D3] dark:border-slate-700 hover:border-[#B85B3E] transition-colors bg-white dark:bg-slate-800"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-[#FBF7EF] dark:bg-slate-700 flex items-center justify-center font-semibold text-xs text-[#B85B3E]">
+                  <div className="w-8 h-8 ui-avatar rounded-full bg-[#FBF7EF] dark:bg-slate-700 flex items-center justify-center font-semibold text-xs text-[#B85B3E]">
                     {profile?.display_name ? profile.display_name.charAt(0).toUpperCase() : user.fullName.charAt(0).toUpperCase()}
                   </div>
                   <div className="hidden sm:block text-left pr-1">

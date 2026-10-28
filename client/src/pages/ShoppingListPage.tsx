@@ -97,7 +97,7 @@ export const ShoppingListPage: React.FC<ShoppingListProps> = ({ onNavigate }) =>
       {/* Title & Budget Meter */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E8E6E1] dark:border-slate-800">
         <div>
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#C75A3B]/10 text-[#C75A3B] text-xs font-semibold">
+          <div className="section-eyebrow">
             <ShoppingCart className="w-3.5 h-3.5" />
             <span>Next-Basket Optimiser</span>
           </div>

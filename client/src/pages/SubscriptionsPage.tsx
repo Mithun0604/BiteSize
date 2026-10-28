@@ -117,7 +117,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsProps> = ({ onNavigate }) 
       
       {/* Title */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#C75A3B]/10 text-[#C75A3B] text-xs font-semibold">
+        <div className="section-eyebrow">
           <ShieldCheck className="w-3.5 h-3.5" />
           <span>Transparent Nutrition & Grocery Intelligence</span>
         </div>

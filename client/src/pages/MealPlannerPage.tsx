@@ -127,7 +127,7 @@ export const MealPlannerPage: React.FC<MealPlannerProps> = ({ onNavigate }) => {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#C75A3B]/10 text-[#C75A3B] text-xs font-semibold">
+          <div className="section-eyebrow">
             <ChefHat className="w-3.5 h-3.5" />
             <span>AI Precision Meal Planning</span>
           </div>

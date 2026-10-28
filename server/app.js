@@ -6,7 +6,9 @@ const fs = require('fs');
 const { initDatabase } = require('./config/database');
 const { seedDemoUser } = require('./data/seedData');
 const upload = require('./middleware/upload');
+const mealUpload = require('./middleware/mealUpload');
 const { authenticateToken } = require('./middleware/auth');
+const { searchFoods } = require('./data/foodDatabase');
 
 // Controllers
 const authCtrl = require('./controllers/authController');
@@ -80,7 +82,22 @@ app.put('/api/auth/profile', authenticateToken, authCtrl.updateProfile);
 app.delete('/api/auth/account', authenticateToken, authCtrl.deleteAccount);
 
 // 2. Meal Scanner & Daily Nutrition Routes
-app.post('/api/meals/scan', authenticateToken, upload.single('image'), mealCtrl.scanMeal);
+app.post('/api/meals/scan', authenticateToken, mealUpload.single('image'), mealCtrl.scanMeal);
+app.get('/api/foods/search', authenticateToken, (req, res) => {
+  const query = String(req.query.q || '').trim().slice(0, 80);
+  const foods = searchFoods(query).slice(0, 20).map(food => ({
+    id: food.id,
+    name: food.name,
+    category: food.category,
+    standardServingGrams: food.standardServingGrams,
+    servingUnit: food.servingUnit,
+    per100g: food.per100g,
+    micronutrients: food.micronutrients,
+    approxCostPerKg: food.approxCostPerKg,
+    tags: food.tags
+  }));
+  res.json({ success: true, data: foods });
+});
 app.post('/api/meals/confirm', authenticateToken, mealCtrl.confirmAndSaveMeal);
 app.get('/api/meals', authenticateToken, mealCtrl.getMealsByDate);
 app.get('/api/meals/all', authenticateToken, mealCtrl.getAllMeals);
@@ -156,6 +173,12 @@ if (fs.existsSync(clientBuildPath)) {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Unhandled server error:', err);
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({ success: false, code: 'UPLOAD_TOO_LARGE', message: 'This file is larger than the upload limit for this tool.' });
+  }
+  if (err.statusCode) {
+    return res.status(err.statusCode).json({ success: false, code: err.code || 'UPLOAD_FAILED', message: err.message });
+  }
   res.status(500).json({
     success: false,
     message: err.message || 'Internal Server Error'

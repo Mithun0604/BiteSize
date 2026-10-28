@@ -48,7 +48,11 @@ export const apiRequest = async <T = any>(
   const data = await response.json().catch(() => ({ success: false, message: 'Invalid response from server' }));
 
   if (!response.ok) {
-    throw new Error(data.message || `Request failed with status ${response.status}`);
+    const error: any = new Error(data.message || `Request failed with status ${response.status}`);
+    error.status = response.status;
+    error.code = data.code;
+    error.limitReached = Boolean(data.limitReached);
+    throw error;
   }
 
   return data;
@@ -74,6 +78,10 @@ export const mealApi = {
   getAllMeals: (limit: number = 50, search?: string) =>
     apiRequest(`/meals/all?limit=${limit}${search ? `&search=${encodeURIComponent(search)}` : ''}`),
   deleteMeal: (id: number) => apiRequest(`/meals/${id}`, { method: 'DELETE' })
+};
+
+export const foodApi = {
+  search: (query: string) => apiRequest(`/foods/search?q=${encodeURIComponent(query)}`)
 };
 
 // Receipts

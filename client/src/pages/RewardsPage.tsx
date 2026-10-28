@@ -72,7 +72,7 @@ export const RewardsPage: React.FC<RewardsProps> = ({ onNavigate }) => {
       
       {/* Title */}
       <div className="space-y-2">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#D4A85A]/15 text-[#D4A85A] text-xs font-semibold">
+        <div className="section-eyebrow">
           <Coins className="w-3.5 h-3.5" />
           <span>Bite Currency Rewards Programme</span>
         </div>
@@ -153,9 +153,9 @@ export const RewardsPage: React.FC<RewardsProps> = ({ onNavigate }) => {
             </span>
           </div>
 
-          <div className="w-full bg-[#E8E6E1] dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+          <div className="w-full bg-[#E8E6E1] dark:bg-slate-700 h-2 ui-progress-track overflow-hidden">
             <div
-              className="bg-[#2E7D6B] h-full rounded-full transition-all"
+              className="bg-[#2E7D6B] h-full ui-progress-fill transition-all"
               style={{ width: `${goalsProgress?.percent || 0}%` }}
             ></div>
           </div>
@@ -201,8 +201,8 @@ export const RewardsPage: React.FC<RewardsProps> = ({ onNavigate }) => {
                     <span>Progress</span>
                     <span className="font-bold">{pct}%</span>
                   </div>
-                  <div className="w-full bg-[#E8E6E1] dark:bg-slate-600 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-[#C75A3B] h-full rounded-full" style={{ width: `${pct}%` }}></div>
+                  <div className="w-full bg-[#E8E6E1] dark:bg-slate-600 h-1.5 ui-progress-track overflow-hidden">
+                    <div className="bg-[#C75A3B] h-full ui-progress-fill" style={{ width: `${pct}%` }}></div>
                   </div>
                 </div>
               </div>

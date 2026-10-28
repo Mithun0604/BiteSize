@@ -21,7 +21,7 @@ export const AboutPage: React.FC<AboutProps> = ({ onNavigate }) => {
       
       {/* Hero Section */}
       <div className="text-center space-y-4 max-w-3xl mx-auto">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#C75A3B]/10 text-[#C75A3B] text-xs font-semibold">
+        <div className="section-eyebrow">
           <Sparkles className="w-3.5 h-3.5" />
           <span>The BiteSize Story</span>
         </div>

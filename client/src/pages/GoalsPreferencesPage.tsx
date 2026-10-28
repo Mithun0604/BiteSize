@@ -137,7 +137,7 @@ export const GoalsPreferencesPage: React.FC<GoalsPreferencesProps> = ({ onNaviga
       
       {/* Header */}
       <div>
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#C75A3B]/10 text-[#C75A3B] text-xs font-semibold">
+        <div className="section-eyebrow">
           <Target className="w-3.5 h-3.5" />
           <span>Personalization Engine</span>
         </div>

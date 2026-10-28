@@ -88,7 +88,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
             Good day, {profile?.display_name || 'Friend'}
           </h1>
           <p className="text-xs text-[#5B6B7A] dark:text-slate-400 mt-1 flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-[#2E7D6B]"></span>
+            <span className="w-2 h-2 ui-dot bg-[#2E7D6B]"></span>
             <span>Target: {profile?.fitness_goal?.replace(/_/g, ' ')} • Daily intake calibrated to {profile?.calorie_target} kcal</span>
           </p>
         </div>
@@ -149,7 +149,7 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
             <span className="text-xs font-semibold text-[#5B6B7A] dark:text-slate-400 uppercase tracking-wider">
               Calorie Intake Today
             </span>
-            <UncertaintyBadge uncertaintyRange="±10%" />
+            <UncertaintyBadge uncertaintyRange="Review portion" />
           </div>
 
           <div className="flex items-center space-x-5">
@@ -223,9 +223,9 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
             </div>
 
             {/* Progress Bar */}
-            <div className="w-full bg-[#E8E6E1] dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+            <div className="w-full bg-[#E8E6E1] dark:bg-slate-700 h-2.5 ui-progress-track overflow-hidden">
               <div
-                className="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-[#2E7D6B] to-[#D4A85A]"
+                className="h-full ui-progress-fill transition-all duration-500 bg-gradient-to-r from-[#2E7D6B] to-[#D4A85A]"
                 style={{ width: `${Math.min(100, budgetOverview.percentUsed)}%` }}
               ></div>
             </div>
@@ -304,16 +304,16 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
           <div className="p-4 rounded-2xl bg-[#FAF8F4] dark:bg-slate-700/50 border border-[#E8E6E1] dark:border-slate-600 space-y-2">
             <div className="flex justify-between text-xs">
               <span className="font-semibold text-[#2E2E2E] dark:text-white flex items-center">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#C75A3B] mr-2"></span>
+                <span className="w-2.5 h-2.5 ui-dot bg-[#C75A3B] mr-2"></span>
                 Protein
               </span>
               <span className="font-bold text-[#C75A3B]">
                 {todayMacros.protein}g / {todayMacros.proteinTarget}g
               </span>
             </div>
-            <div className="w-full bg-[#E8E6E1] dark:bg-slate-600 h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-[#E8E6E1] dark:bg-slate-600 h-2 ui-progress-track overflow-hidden">
               <div
-                className="bg-[#C75A3B] h-full rounded-full transition-all"
+                className="bg-[#C75A3B] h-full ui-progress-fill transition-all"
                 style={{ width: `${todayMacros.proteinProgress}%` }}
               ></div>
             </div>
@@ -326,16 +326,16 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
           <div className="p-4 rounded-2xl bg-[#FAF8F4] dark:bg-slate-700/50 border border-[#E8E6E1] dark:border-slate-600 space-y-2">
             <div className="flex justify-between text-xs">
               <span className="font-semibold text-[#2E2E2E] dark:text-white flex items-center">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#D4A85A] mr-2"></span>
+                <span className="w-2.5 h-2.5 ui-dot bg-[#D4A85A] mr-2"></span>
                 Carbohydrates
               </span>
               <span className="font-bold text-[#D4A85A]">
                 {todayMacros.carbs}g / {todayMacros.carbTarget}g
               </span>
             </div>
-            <div className="w-full bg-[#E8E6E1] dark:bg-slate-600 h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-[#E8E6E1] dark:bg-slate-600 h-2 ui-progress-track overflow-hidden">
               <div
-                className="bg-[#D4A85A] h-full rounded-full transition-all"
+                className="bg-[#D4A85A] h-full ui-progress-fill transition-all"
                 style={{ width: `${todayMacros.carbProgress}%` }}
               ></div>
             </div>
@@ -348,16 +348,16 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
           <div className="p-4 rounded-2xl bg-[#FAF8F4] dark:bg-slate-700/50 border border-[#E8E6E1] dark:border-slate-600 space-y-2">
             <div className="flex justify-between text-xs">
               <span className="font-semibold text-[#2E2E2E] dark:text-white flex items-center">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#5B6B7A] mr-2"></span>
+                <span className="w-2.5 h-2.5 ui-dot bg-[#5B6B7A] mr-2"></span>
                 Healthy Fats
               </span>
               <span className="font-bold text-[#5B6B7A]">
                 {todayMacros.fat}g / {todayMacros.fatTarget}g
               </span>
             </div>
-            <div className="w-full bg-[#E8E6E1] dark:bg-slate-600 h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-[#E8E6E1] dark:bg-slate-600 h-2 ui-progress-track overflow-hidden">
               <div
-                className="bg-[#5B6B7A] h-full rounded-full transition-all"
+                className="bg-[#5B6B7A] h-full ui-progress-fill transition-all"
                 style={{ width: `${todayMacros.fatProgress}%` }}
               ></div>
             </div>
@@ -370,16 +370,16 @@ export const DashboardPage: React.FC<DashboardProps> = ({ onNavigate }) => {
           <div className="p-4 rounded-2xl bg-[#FAF8F4] dark:bg-slate-700/50 border border-[#E8E6E1] dark:border-slate-600 space-y-2">
             <div className="flex justify-between text-xs">
               <span className="font-semibold text-[#2E2E2E] dark:text-white flex items-center">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#2E7D6B] mr-2"></span>
+                <span className="w-2.5 h-2.5 ui-dot bg-[#2E7D6B] mr-2"></span>
                 Dietary Fiber
               </span>
               <span className="font-bold text-[#2E7D6B]">
                 {todayMacros.fiber}g / {todayMacros.fiberTarget}g
               </span>
             </div>
-            <div className="w-full bg-[#E8E6E1] dark:bg-slate-600 h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-[#E8E6E1] dark:bg-slate-600 h-2 ui-progress-track overflow-hidden">
               <div
-                className="bg-[#2E7D6B] h-full rounded-full transition-all"
+                className="bg-[#2E7D6B] h-full ui-progress-fill transition-all"
                 style={{ width: `${todayMacros.fiberProgress}%` }}
               ></div>
             </div>

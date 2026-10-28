@@ -78,7 +78,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
       
       {/* Title */}
       <div className="text-center space-y-4 max-w-2xl mx-auto">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#C75A3B]/10 text-[#C75A3B] text-xs font-semibold">
+        <div className="section-eyebrow">
           <Sparkles className="w-3.5 h-3.5" />
           <span>Simple, Honest Pricing</span>
         </div>
@@ -86,7 +86,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
           Invest in Your Health. Save on Your Groceries.
         </h1>
         <p className="text-sm text-[#5B6B7A] dark:text-slate-400">
-          Start free with Small Bite or unlock unlimited AI meal vision, receipt intelligence, and family sharing.
+          Start free with meal photo suggestions or unlock more meal and receipt tools, coaching, and family sharing.
         </p>
 
         <p className="text-xs text-[#5B6B7A] dark:text-slate-400 pt-2">Monthly plans. Prices are supplied by the server.</p>
@@ -118,7 +118,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
             <ul className="space-y-2.5 text-xs text-[#2E2E2E] dark:text-slate-300 pt-4 border-t border-[#E8E6E1] dark:border-slate-700">
               <li className="flex items-center space-x-2">
                 <Check className="w-4 h-4 text-[#2E7D6B] shrink-0" />
-                <span>10 AI meal scans per month</span>
+                <span>10 meal photo scans per month</span>
               </li>
               <li className="flex items-center space-x-2">
                 <Check className="w-4 h-4 text-[#2E7D6B] shrink-0" />
@@ -176,7 +176,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
             <ul className="space-y-2.5 text-xs text-[#2E2E2E] dark:text-slate-300 pt-4 border-t border-[#E8E6E1] dark:border-slate-700">
               <li className="flex items-center space-x-2">
                 <Check className="w-4 h-4 text-[#C75A3B] shrink-0" />
-                <span className="font-bold">Unlimited AI meal photo scans</span>
+                <span className="font-bold">Unlimited meal photo scans</span>
               </li>
               <li className="flex items-center space-x-2">
                 <Check className="w-4 h-4 text-[#C75A3B] shrink-0" />

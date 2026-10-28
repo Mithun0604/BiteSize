@@ -149,7 +149,7 @@ export const FoodDiaryPage: React.FC<FoodDiaryProps> = ({ onNavigate }) => {
       {/* Header & Date Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#C75A3B]/10 text-[#C75A3B] text-xs font-semibold">
+          <div className="section-eyebrow">
             <UtensilsCrossed className="w-3.5 h-3.5" />
             <span>Daily Nutrition & Food Diary</span>
           </div>
@@ -241,9 +241,9 @@ export const FoodDiaryPage: React.FC<FoodDiaryProps> = ({ onNavigate }) => {
               <span className="font-bold text-[#2E2E2E] dark:text-white">Protein</span>
               <span className="font-semibold text-[#C75A3B]">{totals.protein}g / {targets.protein}g</span>
             </div>
-            <div className="w-full h-2 rounded-full bg-stone-200 dark:bg-slate-600 overflow-hidden">
+            <div className="w-full h-2 ui-progress-track bg-stone-200 dark:bg-slate-600 overflow-hidden">
               <div
-                className="h-full rounded-full bg-[#C75A3B] transition-all duration-500"
+                className="h-full ui-progress-fill bg-[#C75A3B] transition-all duration-500"
                 style={{ width: `${proteinPct}%` }}
               />
             </div>
@@ -256,9 +256,9 @@ export const FoodDiaryPage: React.FC<FoodDiaryProps> = ({ onNavigate }) => {
               <span className="font-bold text-[#2E2E2E] dark:text-white">Carbohydrates</span>
               <span className="font-semibold text-[#D4A85A]">{totals.carbs}g / {targets.carbs}g</span>
             </div>
-            <div className="w-full h-2 rounded-full bg-stone-200 dark:bg-slate-600 overflow-hidden">
+            <div className="w-full h-2 ui-progress-track bg-stone-200 dark:bg-slate-600 overflow-hidden">
               <div
-                className="h-full rounded-full bg-[#D4A85A] transition-all duration-500"
+                className="h-full ui-progress-fill bg-[#D4A85A] transition-all duration-500"
                 style={{ width: `${carbPct}%` }}
               />
             </div>
@@ -271,9 +271,9 @@ export const FoodDiaryPage: React.FC<FoodDiaryProps> = ({ onNavigate }) => {
               <span className="font-bold text-[#2E2E2E] dark:text-white">Healthy Fats</span>
               <span className="font-semibold text-[#5B6B7A]">{totals.fat}g / {targets.fat}g</span>
             </div>
-            <div className="w-full h-2 rounded-full bg-stone-200 dark:bg-slate-600 overflow-hidden">
+            <div className="w-full h-2 ui-progress-track bg-stone-200 dark:bg-slate-600 overflow-hidden">
               <div
-                className="h-full rounded-full bg-[#5B6B7A] transition-all duration-500"
+                className="h-full ui-progress-fill bg-[#5B6B7A] transition-all duration-500"
                 style={{ width: `${fatPct}%` }}
               />
             </div>
@@ -286,9 +286,9 @@ export const FoodDiaryPage: React.FC<FoodDiaryProps> = ({ onNavigate }) => {
               <span className="font-bold text-[#2E2E2E] dark:text-white">Dietary Fiber</span>
               <span className="font-semibold text-[#2E7D6B]">{totals.fiber}g / {targets.fiber}g</span>
             </div>
-            <div className="w-full h-2 rounded-full bg-stone-200 dark:bg-slate-600 overflow-hidden">
+            <div className="w-full h-2 ui-progress-track bg-stone-200 dark:bg-slate-600 overflow-hidden">
               <div
-                className="h-full rounded-full bg-[#2E7D6B] transition-all duration-500"
+                className="h-full ui-progress-fill bg-[#2E7D6B] transition-all duration-500"
                 style={{ width: `${Math.min(Math.round((totals.fiber / (targets.fiber || 1)) * 100), 100)}%` }}
               />
             </div>

@@ -8,7 +8,11 @@ const { checkPlanLimit } = require('../services/paymentService');
  */
 const scanMeal = async (req, res) => {
   try {
-    // 1. Check plan limit
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Please upload a meal photo.' });
+    }
+
+    // Check limits before using CPU, but only confirmed meal logs count toward the limit.
     const limitCheck = await checkPlanLimit(req.user.id, 'meal_scan');
     if (!limitCheck.allowed) {
       return res.status(403).json({
@@ -16,10 +20,6 @@ const scanMeal = async (req, res) => {
         limitReached: true,
         message: limitCheck.message
       });
-    }
-
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'Please upload a meal photo.' });
     }
 
     const imagePath = req.file.path;
@@ -91,7 +91,7 @@ const confirmAndSaveMeal = async (req, res) => {
         mealType || 'lunch',
         imagePath || null,
         1,
-        confidenceScore || 0.90,
+        confidenceScore ?? 0.90,
         uncertaintyRange || '±10%',
         cookingMethod || 'Tempered / Light Sauté',
         addedOil || 'None',

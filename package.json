@@ -7,6 +7,7 @@
     "install:all": "npm install && cd server && npm install && cd ../client && npm install",
     "server": "cd server && npm start",
     "client": "cd client && npm run dev",
+    "test": "node --test",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "build": "cd client && npm install && npm run build",
     "start": "node server/index.js"
@@ -21,6 +22,7 @@
   "author": "BiteSize Team",
   "license": "MIT",
   "dependencies": {
+    "@huggingface/transformers": "^4.3.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

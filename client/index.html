@@ -4,11 +4,22 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      try {
+        if (localStorage.getItem('bitesize_theme') !== 'light') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      } catch {
+        document.documentElement.classList.add('dark');
+      }
+    </script>
     <title>BiteSize — Your groceries, understood.</title>
-    <!-- Google Fonts: Playfair Display & Inter -->
+    <!-- Google Fonts: Lora & Source Sans 3 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
   </head>
   <body class="bg-[#FAF8F4] text-[#2E2E2E] antialiased selection:bg-[#F6D6C9] selection:text-[#C75A3B]">
     <div id="root"></div>

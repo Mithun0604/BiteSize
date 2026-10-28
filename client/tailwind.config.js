@@ -31,8 +31,8 @@ export default {
         }
       },
       fontFamily: {
-        serif: ['"Playfair Display"', 'Georgia', 'serif'],
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif']
+        serif: ['Lora', 'Georgia', 'serif'],
+        sans: ['"Source Sans 3"', 'system-ui', '-apple-system', 'sans-serif']
       },
       boxShadow: {
         'soft': '0 4px 20px -2px rgba(46, 46, 46, 0.06)',

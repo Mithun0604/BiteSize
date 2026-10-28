@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ArrowRight, BarChart3, Camera, Check, Leaf, ShoppingBasket, Sprout } from 'lucide-react';
 
 interface LandingPageProps {
@@ -8,6 +8,13 @@ interface LandingPageProps {
 
 const BowlIllustration = () => (
   <div className="home-bowl-art" aria-label="Illustration of a balanced meal" role="img">
+    <svg className="home-art-trails" viewBox="0 0 520 480" aria-hidden="true">
+      <path className="home-art-trail trail-one" d="M70 235C54 128 145 58 242 74c98 16 129 91 205 66" />
+      <path className="home-art-trail trail-two" d="M85 205C97 102 194 55 285 88c64 23 96 69 153 52" />
+    </svg>
+    <span className="home-art-particle particle-one" aria-hidden="true" />
+    <span className="home-art-particle particle-two" aria-hidden="true" />
+    <span className="home-art-particle particle-three" aria-hidden="true" />
     <svg viewBox="0 0 520 480" className="h-full w-full" aria-hidden="true">
       <ellipse cx="260" cy="428" rx="170" ry="24" fill="#34594A" opacity=".12" />
       <path d="M74 112 398 31l78 305-326 82z" fill="#F2E5D5" opacity=".75" />
@@ -29,15 +36,48 @@ const BowlIllustration = () => (
       <path d="M118 155c-1-40 32-70 67-68-2 34-25 61-67 68ZM386 142c6-40 39-65 73-59-8 33-34 57-73 59Z" fill="#74917C" opacity=".65" />
       <path d="M147 108c7-27 27-43 53-41-6 24-25 40-53 41Z" fill="#C86A4B" opacity=".85" />
     </svg>
-    <div className="home-art-note"><Sprout size={16} /><span>Good food, made simpler</span></div>
   </div>
 );
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => (
+export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
+  const animationRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!animationRef.current) return;
+    let active = true;
+    let media: { add: (conditions: string, handler: () => void) => void; revert: () => void } | undefined;
+    Promise.all([import('gsap'), import('gsap/ScrollTrigger')]).then(([gsapModule, scrollModule]) => {
+      if (!active || !animationRef.current) return;
+      const animation = gsapModule.gsap;
+      animation.registerPlugin(scrollModule.ScrollTrigger);
+      media = animation.matchMedia(animationRef);
+      media.add('(min-width: 768px) and (prefers-reduced-motion: no-preference)', () => {
+        const timeline = animation.timeline({
+          scrollTrigger: {
+            trigger: animationRef.current,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 0.8
+          }
+        });
+        timeline
+          .fromTo('.trail-one', { strokeDashoffset: 280, opacity: 0 }, { strokeDashoffset: 0, opacity: 0.72, duration: 1 }, 0)
+          .fromTo('.trail-two', { strokeDashoffset: -250, opacity: 0 }, { strokeDashoffset: 0, opacity: 0.42, duration: 1 }, 0)
+          .fromTo('.particle-one', { x: -18, y: 18, opacity: 0 }, { x: 30, y: -26, opacity: 1, duration: 1 }, 0)
+          .fromTo('.particle-two', { x: 20, y: 24, opacity: 0 }, { x: -28, y: -18, opacity: 0.9, duration: 1 }, 0)
+          .fromTo('.particle-three', { x: -12, y: -14, opacity: 0 }, { x: 20, y: 28, opacity: 0.85, duration: 1 }, 0);
+      });
+    });
+    return () => {
+      active = false;
+      media?.revert();
+    };
+  }, []);
+
+  return (
   <div className="home-page">
     <section className="home-hero mx-auto grid max-w-7xl items-center gap-8 px-5 py-10 sm:px-8 sm:py-14 lg:grid-cols-[1fr_1.05fr] lg:gap-12 lg:px-12 lg:py-16">
       <div className="relative z-10 max-w-xl">
-        <div className="home-eyebrow"><Leaf size={15} /> A little more balance, every day</div>
         <h1 className="home-title">
           Better food choices.<br />
           <span>Smarter spending.</span>
@@ -55,7 +95,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => (
         </div>
         <p className="home-small-note"><Check size={15} /> Your food details stay yours. Start with the basics.</p>
       </div>
-      <BowlIllustration />
+      <div ref={animationRef}><BowlIllustration /></div>
     </section>
 
     <section className="mx-auto grid max-w-6xl gap-4 px-5 pb-12 sm:grid-cols-3 sm:px-8 lg:px-12" aria-label="BiteSize benefits">
@@ -103,4 +143,5 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => (
       Nutrition insights are estimates for general information and are not medical advice.
     </p>
   </div>
-);
+  );
+};

@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { mealApi } from '../services/api';
+import React, { useState, useRef, useEffect } from 'react';
+import { foodApi, mealApi } from '../services/api';
 import { UncertaintyBadge } from '../components/UncertaintyBadge';
 import { PlanLimitBanner } from '../components/PlanLimitBanner';
 import {
@@ -45,16 +45,95 @@ export const MealScannerPage: React.FC<MealScannerProps> = ({ onNavigate }) => {
   const [editableAddedOil, setEditableAddedOil] = useState('No added cooking fat (0 kcal)');
   const [editableIngredients, setEditableIngredients] = useState<any[]>([]);
   const [mealNotes, setMealNotes] = useState('');
+  const [manualSearchOpen, setManualSearchOpen] = useState(false);
+  const [manualSearchQuery, setManualSearchQuery] = useState('');
+  const [manualFoods, setManualFoods] = useState<any[]>([]);
+  const [manualSearchLoading, setManualSearchLoading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (!scanResult?.needsManualSelection && !manualSearchOpen) return;
+    let active = true;
+    setManualSearchLoading(true);
+    const timer = window.setTimeout(() => {
+      foodApi.search(manualSearchQuery).then((res: any) => {
+        if (active) setManualFoods(res.data || []);
+      }).catch(() => {
+        if (active) setManualFoods([]);
+      }).finally(() => {
+        if (active) setManualSearchLoading(false);
+      });
+    }, 180);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [manualSearchQuery, manualSearchOpen, scanResult?.needsManualSelection]);
+
+  useEffect(() => () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
+
   const handleFileSelect = (file: File) => {
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      setError('Please choose a JPG, PNG, or WebP image.');
+      return;
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      setError('Meal photos must be 4 MB or smaller.');
+      return;
+    }
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
     setSelectedFile(file);
     setPreviewUrl(URL.createObjectURL(file));
     setScanResult(null);
     setError(null);
     setSuccessMessage(null);
+    setManualSearchOpen(false);
+    setManualSearchQuery('');
+  };
+
+  const handleChooseFood = (food: any) => {
+    const portionGrams = food.standardServingGrams || 150;
+    const factor = portionGrams / 100;
+    const candidate = {
+      candidateId: food.id,
+      name: food.name,
+      category: food.category,
+      confidence: 1,
+      portionGrams,
+      servingDescription: food.servingUnit,
+      per100g: food.per100g,
+      calculated: {
+        calories: Math.round(food.per100g.calories * factor),
+        protein: +(food.per100g.protein * factor).toFixed(1),
+        carbs: +(food.per100g.carbs * factor).toFixed(1),
+        fat: +(food.per100g.fat * factor).toFixed(1),
+        fiber: +(food.per100g.fiber * factor).toFixed(1),
+        sugar: +(food.per100g.sugar * factor).toFixed(1),
+        sodium: Math.round(food.per100g.sodium * factor)
+      }
+    };
+    setScanResult((current: any) => ({
+      ...current,
+      mealName: food.name,
+      needsManualSelection: false,
+      candidates: [candidate],
+      confidenceScore: 0,
+      uncertaintyRange: 'Manually selected',
+      clarificationNeeded: ['Set the portion size and any added oil, sauce, or toppings.']
+    }));
+    handleSelectCandidate(candidate, 0);
+    setManualSearchOpen(false);
+    setError(null);
   };
 
   const executeScan = async () => {
@@ -86,8 +165,21 @@ export const MealScannerPage: React.FC<MealScannerProps> = ({ onNavigate }) => {
         setEditableIngredients(data.ingredients || [primary]);
       }
     } catch (err: any) {
-      if (err.message && err.message.includes('limit')) {
+      if (err.limitReached || (err.message && err.message.toLowerCase().includes('limit'))) {
         setLimitBanner(err.message);
+      } else if (err.status >= 500) {
+        setError(null);
+        setManualSearchQuery('');
+        setManualSearchOpen(true);
+        setScanResult({
+          mealName: 'Photo analysis unavailable',
+          confidenceScore: 0,
+          uncertaintyRange: 'Not available',
+          needsManualSelection: true,
+          candidates: [],
+          ingredients: [],
+          clarificationNeeded: ['The photo model could not start. Search the food catalog below to log this meal manually.']
+        });
       } else {
         setError(err.message || 'Analysis failed. Please check image format.');
       }
@@ -233,7 +325,7 @@ export const MealScannerPage: React.FC<MealScannerProps> = ({ onNavigate }) => {
         fiber: totals.fiber,
         sugar: totals.sugar,
         sodium: totals.sodium,
-        confidenceScore: scanResult?.confidenceScore || 0.88,
+        confidenceScore: scanResult?.confidenceScore ?? 0,
         uncertaintyRange: scanResult?.uncertaintyRange || '±9%',
         cookingMethod: editableCookingMethod,
         addedOil: editableAddedOil,
@@ -264,15 +356,15 @@ export const MealScannerPage: React.FC<MealScannerProps> = ({ onNavigate }) => {
       
       {/* Title & Precision Standards Banner */}
       <div className="space-y-2">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#C75A3B]/10 text-[#C75A3B] text-xs font-semibold">
+        <div className="section-eyebrow">
           <Camera className="w-3.5 h-3.5" />
-          <span>BiteSize Vision & IFCT Nutrition Intelligence</span>
+          <span>Photo assisted food logging</span>
         </div>
         <h1 className="font-serif text-3xl font-bold text-[#2E2E2E] dark:text-white">
-          AI Meal Photo Scanner
+          Meal Photo Scanner
         </h1>
         <p className="text-xs text-[#5B6B7A] dark:text-slate-400 max-w-2xl leading-relaxed">
-          Capture or upload your meal photo. BiteSize inspects image characteristics, surfaces candidate matches with transparent confidence ratings, and calculates nutrition strictly against verified ICMR-NIN & USDA tables.
+          Upload a meal photo for a food suggestion. Confirm the food and portion before logging; nutrition comes from BiteSize’s curated food database.
         </p>
       </div>
 
@@ -306,15 +398,21 @@ export const MealScannerPage: React.FC<MealScannerProps> = ({ onNavigate }) => {
             ref={fileInputRef}
             accept="image/jpeg,image/png,image/webp"
             className="hidden"
-            onChange={e => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
+            onChange={e => {
+              if (e.target.files?.[0]) handleFileSelect(e.target.files[0]);
+              e.target.value = '';
+            }}
           />
           <input
             type="file"
             ref={cameraInputRef}
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp"
             capture="environment"
             className="hidden"
-            onChange={e => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
+            onChange={e => {
+              if (e.target.files?.[0]) handleFileSelect(e.target.files[0]);
+              e.target.value = '';
+            }}
           />
 
           {previewUrl ? (
@@ -338,7 +436,7 @@ export const MealScannerPage: React.FC<MealScannerProps> = ({ onNavigate }) => {
                   className="px-6 py-2.5 rounded-xl text-xs font-bold bg-[#C75A3B] text-white hover:bg-[#b0482b] shadow-md shadow-[#C75A3B]/20 flex items-center space-x-2"
                 >
                   <Sparkles className="w-4 h-4" />
-                  <span>{scanning ? 'Analyzing Food Vision...' : 'Analyze Meal with AI'}</span>
+                    <span>{scanning ? 'Checking photo…' : 'Identify food'}</span>
                 </button>
               </div>
             </div>
@@ -378,41 +476,24 @@ export const MealScannerPage: React.FC<MealScannerProps> = ({ onNavigate }) => {
               <div className="pt-4 border-t border-[#E8E6E1] dark:border-slate-700">
                 <button
                   onClick={() => {
-                    const presetCandidates = [
-                      {
-                        name: "Skinless Chicken Breast (Grilled / Pan-Seared)",
-                        portionGrams: 150,
-                        confidence: 0.90,
-                        per100g: { calories: 165, protein: 31.0, carbs: 0, fat: 3.6, fiber: 0, sugar: 0, sodium: 74 }
-                      },
-                      {
-                        name: "Raw Skinless Chicken Breast (Boneless)",
-                        portionGrams: 150,
-                        confidence: 0.82,
-                        per100g: { calories: 120, protein: 22.5, carbs: 0, fat: 2.6, fiber: 0, sugar: 0, sodium: 65 }
-                      },
-                      {
-                        name: "Tandoori Chicken Tikka (Boneless)",
-                        portionGrams: 160,
-                        confidence: 0.75,
-                        per100g: { calories: 160, protein: 26.5, carbs: 3.5, fat: 4.5, fiber: 0.5, sugar: 1.0, sodium: 280 }
-                      }
-                    ];
                     setScanResult({
-                      mealName: presetCandidates[0].name,
-                      confidenceScore: 0.90,
-                      uncertaintyRange: '±9%',
-                      candidates: presetCandidates,
-                      clarificationNeeded: [
-                        "Confirm if oil or butter was added while grilling.",
-                        "Confirm portion matches 150g fillet."
-                      ]
+                      mealName: 'Choose a food',
+                      confidenceScore: 0,
+                      uncertaintyRange: 'Manually selected',
+                      needsManualSelection: true,
+                      candidates: [],
+                      ingredients: [],
+                      clarificationNeeded: []
                     });
-                    handleSelectCandidate(presetCandidates[0], 0);
+                    setEditableMealName('');
+                    setEditableIngredients([]);
+                    setManualSearchQuery('');
+                    setError(null);
+                    setLimitBanner(null);
                   }}
                   className="text-xs text-[#5B6B7A] hover:text-[#C75A3B] underline"
                 >
-                  Or quick-test with Chicken Breast Fillet
+                  Choose a food without a photo
                 </button>
               </div>
             </div>
@@ -429,12 +510,16 @@ export const MealScannerPage: React.FC<MealScannerProps> = ({ onNavigate }) => {
             <div>
               <div className="flex items-center space-x-2">
                 <span className="text-xs font-bold text-[#C75A3B] uppercase tracking-wider">
-                  Vision Identification
+                  {scanResult.needsManualSelection ? 'Model suggestion' : scanResult.confidenceScore ? 'Model category match' : 'Food selection'}
                 </span>
-                <UncertaintyBadge
-                  uncertaintyRange={scanResult.uncertaintyRange || "±9%"}
-                  confidenceScore={scanResult.confidenceScore || 0.88}
-                />
+                {scanResult.confidenceScore > 0 && (
+                  <UncertaintyBadge
+                    uncertaintyRange={scanResult.uncertaintyRange || 'Review the food match'}
+                    confidenceScore={scanResult.confidenceScore}
+                    label="Photo category match"
+                    explanation={`The photo model matched a food category with ${Math.round(scanResult.confidenceScore * 100)}% confidence. It does not identify ingredients or portion size. Review the food and grams; nutrition uses BiteSize's curated database.`}
+                  />
+                )}
               </div>
               <input
                 type="text"
@@ -507,12 +592,44 @@ export const MealScannerPage: React.FC<MealScannerProps> = ({ onNavigate }) => {
             </div>
           )}
 
+          {(scanResult.needsManualSelection || manualSearchOpen) && (
+            <section className="space-y-3 border border-[#E8E6E1] dark:border-slate-600 p-4" aria-label="Choose food manually">
+              <div>
+                <h2 className="text-sm font-semibold text-[#2E2E2E] dark:text-white">Choose the food manually</h2>
+                <p className="text-xs text-[#5B6B7A] dark:text-slate-300 mt-1">The photo model cannot safely match every food to our nutrition data. Search the catalog and select the closest food.</p>
+              </div>
+              <input
+                type="search"
+                value={manualSearchQuery}
+                onChange={event => setManualSearchQuery(event.target.value)}
+                placeholder="Search foods, for example rice or dosa"
+                className="w-full border border-[#E8E6E1] dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-[#2E2E2E] dark:text-white"
+                aria-label="Search food catalog"
+              />
+              {manualSearchLoading ? <p className="text-xs text-[#5B6B7A] dark:text-slate-300">Searching…</p> : (
+                <div className="max-h-64 overflow-y-auto border border-[#E8E6E1] dark:border-slate-600 divide-y divide-[#E8E6E1] dark:divide-slate-700">
+                  {manualFoods.map(food => (
+                    <button key={food.id} type="button" onClick={() => handleChooseFood(food)} className="w-full p-3 text-left text-sm hover:bg-[#FAF8F4] dark:hover:bg-slate-700">
+                      <span className="block font-semibold text-[#2E2E2E] dark:text-white">{food.name}</span>
+                      <span className="block text-xs text-[#5B6B7A] dark:text-slate-400">{food.category} · {food.per100g.calories} kcal per 100 g</span>
+                    </button>
+                  ))}
+                  {manualFoods.length === 0 && <p className="p-3 text-xs text-[#5B6B7A] dark:text-slate-400">No foods found. Try a shorter search.</p>}
+                </div>
+              )}
+            </section>
+          )}
+
+          {!scanResult.needsManualSelection && !manualSearchOpen && (
+            <button type="button" className="text-xs font-semibold text-[#5B6B7A] underline" onClick={() => setManualSearchOpen(true)}>Choose a different food</button>
+          )}
+
           {/* Clarification Prompts */}
           {scanResult.clarificationNeeded && scanResult.clarificationNeeded.length > 0 && (
             <div className="p-4 rounded-2xl bg-[#FAF8F4] dark:bg-slate-700/50 border border-[#E8E6E1] dark:border-slate-600 space-y-2">
               <div className="flex items-center space-x-1.5 text-xs font-semibold text-[#5B6B7A] dark:text-slate-200">
                 <HelpCircle className="w-4 h-4 text-[#C75A3B]" />
-                <span>AI Clarification Prompts:</span>
+                <span>Things to confirm:</span>
               </div>
               <ul className="text-xs text-[#5B6B7A] dark:text-slate-300 space-y-1 list-disc list-inside">
                 {scanResult.clarificationNeeded.map((c: string, idx: number) => (
@@ -664,6 +781,7 @@ export const MealScannerPage: React.FC<MealScannerProps> = ({ onNavigate }) => {
               onClick={() => {
                 setScanResult(null);
                 setSelectedFile(null);
+                if (previewUrl) URL.revokeObjectURL(previewUrl);
                 setPreviewUrl(null);
               }}
               className="text-xs font-semibold text-[#5B6B7A] hover:text-[#2E2E2E]"
@@ -673,7 +791,8 @@ export const MealScannerPage: React.FC<MealScannerProps> = ({ onNavigate }) => {
 
             <button
               onClick={handleConfirmAndSave}
-              className="w-full sm:w-auto px-8 py-3 rounded-xl font-bold text-xs bg-[#C75A3B] text-white hover:bg-[#b0482b] shadow-lg shadow-[#C75A3B]/25 transition-transform hover:scale-105 flex items-center justify-center space-x-2"
+              disabled={Boolean(scanResult.needsManualSelection) || editableIngredients.length === 0}
+              className="w-full sm:w-auto px-8 py-3 rounded-xl font-bold text-xs bg-[#C75A3B] text-white hover:bg-[#b0482b] shadow-lg shadow-[#C75A3B]/25 transition-transform hover:scale-105 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>Confirm & Save to Daily Log</span>

@@ -87,7 +87,7 @@ export const WhatIfComparePage: React.FC<WhatIfProps> = ({ onNavigate }) => {
       
       {/* Title */}
       <div className="space-y-2">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#C75A3B]/10 text-[#C75A3B] text-xs font-semibold">
+        <div className="section-eyebrow">
           <ArrowRightLeft className="w-3.5 h-3.5" />
           <span>BiteSize Killer Feature</span>
         </div>

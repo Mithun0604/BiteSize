@@ -116,7 +116,7 @@ export const PantryPage: React.FC<PantryProps> = ({ onNavigate }) => {
       
       {/* Title */}
       <div className="space-y-2">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#2E7D6B]/10 text-[#2E7D6B] text-xs font-semibold">
+        <div className="section-eyebrow">
           <Refrigerator className="w-3.5 h-3.5" />
           <span>Smart Food Storage & Zero Waste</span>
         </div>

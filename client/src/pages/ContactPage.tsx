@@ -36,7 +36,7 @@ export const ContactPage: React.FC<ContactProps> = ({ onNavigate }) => {
       
       {/* Title */}
       <div className="text-center space-y-3 max-w-xl mx-auto">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#C75A3B]/10 text-[#C75A3B] text-xs font-semibold">
+        <div className="section-eyebrow">
           <MessageSquare className="w-3.5 h-3.5" />
           <span>We're Here to Help</span>
         </div>

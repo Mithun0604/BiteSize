@@ -73,7 +73,7 @@ export const FamilyPage: React.FC<FamilyProps> = ({ onNavigate }) => {
       
       {/* Title */}
       <div className="space-y-2">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#5B6B7A]/10 text-[#5B6B7A] text-xs font-semibold">
+        <div className="section-eyebrow">
           <Users className="w-3.5 h-3.5" />
           <span>Shared Bite Family Household</span>
         </div>

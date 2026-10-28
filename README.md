@@ -2,17 +2,16 @@
 > **AI-Powered Grocery & Nutrition Intelligence Platform**  
 > *"Eat well. Spend wisely."*
 
-BiteSize bridges the gap between what people buy, what they eat, and what they can afford. It connects receipt OCR scanning, precision AI meal recognition, personalized nutritional coaching, grocery budgeting, family coordination, and goal-based rewards with Bite Currency.
+BiteSize connects meal photo suggestions, receipt scanning, nutrition tracking, grocery budgeting, family coordination, and goal-based rewards with Bite Currency.
 
 ---
 
 ## 🌟 Key Features
 
-### 1. AI-Powered Meal Photo Scanner (Highest Priority)
-- **Calibrated Vision AI**: Identifies individual dishes and ingredients from photos or live camera captures.
-- **Evidence-Based ICMR-NIN IFCT & USDA Database**: Nutrition is calculated strictly from verified 2024 Indian Food Composition Tables (over 100+ staples: dals, rotis, rice, idli, paneer, curd, chana, sprouts, veggies), never from invented or hallucinated numbers.
-- **Honest Uncertainty Indicators**: Clearly displays confidence scores and visual uncertainty intervals (e.g., `±10%` to `±15%`).
-- **Interactive Review & Calibrations**: Prompts users to confirm cooking methods (boiled, tempered with tadka, sautéed), portion weights in grams, and added fats/oils (ghee, butter, refined oil).
+### 1. Meal Photo Scanner
+- **Free food-category model**: Runs a quantized ONNX image classifier in the Vercel backend. The public model weights are cached in the function's temporary storage.
+- **Catalog-backed nutrition**: Suggestions are matched to BiteSize's curated food database. The model does not estimate ingredients, portion sizes, or nutrition.
+- **User review**: Users confirm or search for the food, then set their portion and added fats or sauces before logging.
 - **Daily Intake Logging**: Automatically saves confirmed meals to the daily intake log and calculates macro targets.
 
 ### 2. Receipt Scanner & Grocery Intelligence
@@ -128,7 +127,7 @@ Production Vercel deployments seed this shared sample account only when ENABLE_D
 PORT=5000
 JWT_SECRET=replace-with-a-long-random-secret
 
-# Required for AI meal scanning, receipt OCR, and personalized AI Coach responses.
+# Required for receipt OCR and personalized AI Coach responses. Meal photo classification runs without this key.
 # Without a key, these features report that setup is required; they do not generate sample results.
 GEMINI_API_KEY=
 GEMINI_MODEL=gemini-3.8-flash
@@ -148,14 +147,14 @@ MYSQL_PASSWORD=
 MYSQL_DATABASE=bitesize_db
 ```
 
-Set `JWT_SECRET`, `GEMINI_API_KEY`, and both Razorpay keys in Vercel before enabling authenticated production features. Password recovery remains disabled until secure reset-email delivery and one-time token verification are implemented. The current runtime still uses ephemeral SQLite and `/tmp` uploads on Vercel, so it is not ready for persistent production user data.
+Set `JWT_SECRET`, `GEMINI_API_KEY` (for receipt OCR and AI Coach), and both Razorpay keys in Vercel before enabling the related features. Password recovery remains disabled until secure reset-email delivery and one-time token verification are implemented. The current runtime still uses ephemeral SQLite and `/tmp` uploads on Vercel, so it is not ready for persistent production user data.
 
 ---
 
 ## 🧪 Manual Workflow Checks
 
 1. **Authentication**: Register a new user with custom dietary preferences and fitness targets, or use the local demo account.
-2. **Meal Scanner**: Configure `GEMINI_API_KEY`, upload a food photo, confirm the identified food and portion, then save to the daily log. Nutrition is calculated from the curated food database.
+2. **Meal Scanner**: Upload a JPG, PNG, or WebP photo up to 4 MB, confirm or search the food, set its portion, then save to the daily log. Photo classification runs in the Vercel backend and nutrition comes from the curated food database.
 3. **Receipt Scanner**: Configure `GEMINI_API_KEY`, upload a receipt image or PDF, review extracted lines and uncertain matches, then confirm.
 4. **AI Coach**: Configure `GEMINI_API_KEY` and ask about saved pantry, meal, and budget data.
 5. **"What If I Changed This?"**: Compare White Rice vs. Quinoa or Potato Chips vs. Roasted Makhana, review exact cost/calorie/protein differences, and click "Add to Shopping List".

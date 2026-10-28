@@ -44,7 +44,7 @@ export const ReportsPage: React.FC<ReportsProps> = ({ onNavigate }) => {
       {/* Title & Export Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E8E6E1] dark:border-slate-800">
         <div>
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#5B6B7A]/10 text-[#5B6B7A] text-xs font-semibold">
+          <div className="section-eyebrow">
             <BarChart3 className="w-3.5 h-3.5" />
             <span>Intelligence & Exportable Analytics</span>
           </div>

@@ -18,7 +18,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyProps> = ({ onNavigate }) 
       </button>
 
       <div className="space-y-2">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#2E7D6B]/15 text-[#2E7D6B] text-xs font-semibold">
+        <div className="section-eyebrow">
           <ShieldCheck className="w-3.5 h-3.5" />
           <span>Privacy & Data Protection</span>
         </div>

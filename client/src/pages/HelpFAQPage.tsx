@@ -12,8 +12,8 @@ export const HelpFAQPage: React.FC<HelpProps> = ({ onNavigate }) => {
 
   const faqs = [
     {
-      q: "How does the AI Meal Scanner estimate calories and macronutrients?",
-      a: "BiteSize uses a computer vision pipeline trained on Indian and international dishes. Rather than generating invented calorie figures, it maps detected foods to authentic ICMR-NIN Indian Food Composition Tables (IFCT) and USDA databases. Because a single photo cannot see cooking oils or gravies, we display clear confidence intervals (±10% to ±15%) and prompt you to confirm cooking oils and portion sizes."
+      q: "How does the Meal Photo Scanner help with nutrition logging?",
+      a: "A food image classifier suggests a category from your photo. It cannot identify every ingredient or portion, so you confirm or search for the food and set the portion yourself. Nutrition is calculated from BiteSize’s curated food database, and you can adjust added oil or sauce before saving."
     },
     {
       q: "How does the Grocery Receipt Scanner work?",
@@ -45,7 +45,7 @@ export const HelpFAQPage: React.FC<HelpProps> = ({ onNavigate }) => {
       
       {/* Title */}
       <div className="text-center max-w-2xl mx-auto space-y-2">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#5B6B7A]/10 text-[#5B6B7A] text-xs font-semibold">
+        <div className="section-eyebrow">
           <HelpCircle className="w-3.5 h-3.5" />
           <span>Help & Support Center</span>
         </div>
