@@ -45,7 +45,19 @@ export const apiRequest = async <T = any>(
     headers
   });
 
-  const data = await response.json().catch(() => ({ success: false, message: 'Invalid response from server' }));
+  const responseText = await response.text();
+  const contentType = response.headers.get('content-type') || 'unknown content type';
+  let data: any;
+  try {
+    data = JSON.parse(responseText);
+  } catch {
+    const message = `The server returned an unexpected response (HTTP ${response.status}, ${contentType}).`;
+    if (!response.ok) {
+      data = { success: false, message };
+    } else {
+      throw new Error(message);
+    }
+  }
 
   if (!response.ok) {
     const error: any = new Error(data.message || `Request failed with status ${response.status}`);

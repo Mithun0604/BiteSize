@@ -172,6 +172,12 @@ if (fs.existsSync(clientBuildPath)) {
   });
 }
 
+// Keep API misses as JSON so the frontend can distinguish a missing route
+// from an empty search result or an HTML page returned by the host.
+app.use('/api', (req, res) => {
+  res.status(404).json({ success: false, message: `API route not found: ${req.method} ${req.path}` });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Unhandled server error:', err);

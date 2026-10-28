@@ -14,12 +14,12 @@
   },
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api"
+      "source": "/api/:path*",
+      "destination": "/api?path=api/:path*"
     },
     {
-      "source": "/uploads/(.*)",
-      "destination": "/api"
+      "source": "/uploads/:path*",
+      "destination": "/api?path=uploads/:path*"
     },
     {
       "source": "/(.*)",
